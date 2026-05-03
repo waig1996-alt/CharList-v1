@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>D&D 5e Character Sheet</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dice-roller.css">
 </head>
 <body>
 <div class="sheet-container">
@@ -195,33 +196,54 @@
     </div>
 </div>
 
-<!-- Кнопки бросков и истории -->
+<!-- КНОПКИ БРОСКА КУБИКОВ И ИСТОРИИ -->
 <button id="openDiceRoller" class="dice-roller-btn">🎲 Бросить кубик</button>
-<button id="openRollHistory" class="dice-roller-btn" style="right: 180px; background: #4a3a2a;">📜 История</button>
+<button id="openRollHistory" class="dice-roller-btn">📜 История</button>
 
-<!-- Панель выбора кубиков -->
+<!-- ПАНЕЛЬ ВЫБОРА КУБИКОВ -->
 <div id="diceSelector" class="dice-panel dice-selector">
-    <div class="dice-panel-title">Выберите кубики</div>
+    <div class="dice-panel-title">Выберите кубики (нажмите на название)</div>
     <div class="dice-grid">
-        <div class="dice-input-row"><span class="dice-input-label">D4</span><input type="number" id="countD4" class="dice-count-input" min="0" value="0"></div>
-        <div class="dice-input-row"><span class="dice-input-label">D6</span><input type="number" id="countD6" class="dice-count-input" min="0" value="0"></div>
-        <div class="dice-input-row"><span class="dice-input-label">D8</span><input type="number" id="countD8" class="dice-count-input" min="0" value="0"></div>
-        <div class="dice-input-row"><span class="dice-input-label">D10</span><input type="number" id="countD10" class="dice-count-input" min="0" value="0"></div>
-        <div class="dice-input-row"><span class="dice-input-label">D12</span><input type="number" id="countD12" class="dice-count-input" min="0" value="0"></div>
-        <div class="dice-input-row"><span class="dice-input-label">D20</span><input type="number" id="countD20" class="dice-count-input" min="0" value="0"></div>
-        <div class="dice-input-row"><span class="dice-input-label">D100</span><input type="number" id="countD100" class="dice-count-input" min="0" value="0"></div>
+        <div class="dice-option" data-sides="4" onclick="incrementDiceCount(4)">
+            <span class="dice-label">D4</span>
+            <span class="dice-count-badge" id="badgeD4">0</span>
+        </div>
+        <div class="dice-option" data-sides="6" onclick="incrementDiceCount(6)">
+            <span class="dice-label">D6</span>
+            <span class="dice-count-badge" id="badgeD6">0</span>
+        </div>
+        <div class="dice-option" data-sides="8" onclick="incrementDiceCount(8)">
+            <span class="dice-label">D8</span>
+            <span class="dice-count-badge" id="badgeD8">0</span>
+        </div>
+        <div class="dice-option" data-sides="10" onclick="incrementDiceCount(10)">
+            <span class="dice-label">D10</span>
+            <span class="dice-count-badge" id="badgeD10">0</span>
+        </div>
+        <div class="dice-option" data-sides="12" onclick="incrementDiceCount(12)">
+            <span class="dice-label">D12</span>
+            <span class="dice-count-badge" id="badgeD12">0</span>
+        </div>
+        <div class="dice-option" data-sides="20" onclick="incrementDiceCount(20)">
+            <span class="dice-label">D20</span>
+            <span class="dice-count-badge" id="badgeD20">0</span>
+        </div>
+        <div class="dice-option" data-sides="100" onclick="incrementDiceCount(100)">
+            <span class="dice-label">D100</span>
+            <span class="dice-count-badge" id="badgeD100">0</span>
+        </div>
     </div>
     <div class="dice-actions">
         <button id="performRoll" class="dice-action-btn btn-roll">Бросить</button>
-        <button id="closeDiceSelector" class="dice-action-btn btn-close">✕</button>
+        <button class="dice-action-btn btn-close" onclick="resetDiceSelector()">✕</button>
     </div>
 </div>
 
-<!-- Панель результатов -->
+<!-- Панель результатов (слева) -->
 <div id="diceResults" class="dice-panel dice-results">
     <div class="dice-panel-title" style="display: flex; justify-content: space-between; align-items: center;">
         <span>📊 Результаты</span>
-        <button id="closeDiceResults" style="background:none; border:none; cursor:pointer; color:var(--text-secondary); font-size:1.2rem;">✕</button>
+        <button id="closeDiceResults" style="background:none; border:none; cursor:pointer; color:var(--text-secondary); font-size:1.2rem;" onclick="closeDiceResults()">✕</button>
     </div>
     <div id="diceResultsContent" style="padding-top: 10px;"></div>
 </div>
@@ -231,14 +253,18 @@
     <div class="dice-panel-title" style="display: flex; justify-content: space-between; align-items: center;">
         <span>📜 История бросков</span>
         <div>
-            <button id="clearHistoryBtn" class="small-btn" style="background: #8b3c2a; margin-right: 5px;">🗑</button>
-            <button id="closeHistoryBtn" class="small-btn">✕</button>
+            <button id="clearHistoryBtn" class="small-btn" style="background: #8b3c2a; margin-right: 5px;" onclick="clearHistory()">🗑</button>
+            <button id="closeHistoryBtn" class="small-btn" onclick="closeRollHistory()">✕</button>
         </div>
     </div>
     <div id="rollHistoryContent" style="padding-top: 10px;"></div>
 </div>
 
+
+<!-- Подключение скриптов  -->
+<script src="js/dice-roller.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/app.js"></script>
+
 </body>
 </html>

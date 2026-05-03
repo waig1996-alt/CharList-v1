@@ -43,7 +43,7 @@ classResources: {
 },
 };
 // ============ ВЕРСИЯ ПРОЕКТА ============
-const APP_VERSION = "1.0.1"; // МАЖОР.МИНОР.ПАТЧ
+const APP_VERSION = "1.0.3"; // МАЖОР.МИНОР.ПАТЧ
 const STORAGE_VERSION_KEY = "dnd_sheet_version";
 const STORAGE_DATA_KEY = "dnd_master_sheet_full";
 // ============ УПРАВЛЕНИЕ ВЕРСИЯМИ ============
@@ -317,6 +317,7 @@ function updateUI() {
         }
     });
 }
+
 
 // ============ МУЛЬТИКЛАССЫ ============
 const classOptionsList = [
@@ -1798,169 +1799,7 @@ document.getElementById('saveToFileBtn')?.addEventListener('click', async () => 
     document.getElementById('charClass')?.addEventListener('change', () => { renderSavingThrows(); autoSave(); });
 }
 
-// === ЛОГИКА БРОСКА КУБИКОВ И ИСТОРИИ ===
-function addRollToHistory(title, detail, result, isCrit = false, isFail = false) {
-    const entry = {
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        title, detail, result, isCrit, isFail, id: Date.now()
-    };
-    
-    state.rollHistory.unshift(entry);
-    if (state.rollHistory.length > 50) state.rollHistory.pop();
-    
-    renderHistory();
-    localStorage.setItem('dnd_roll_history', JSON.stringify(state.rollHistory));
-}
 
-function renderHistory() {
-    const historyContent = document.getElementById('rollHistoryContent');
-    if (!historyContent) return;
-    
-    if (!state.rollHistory || state.rollHistory.length === 0) {
-        historyContent.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">История пуста</div>';
-        return;
-    }
-    
-    historyContent.innerHTML = state.rollHistory.map(item => `
-        <div class="history-item ${item.isCrit ? 'crit' : ''} ${item.isFail ? 'fail' : ''}">
-            <div class="history-info">
-                <span class="history-title">${item.title}</span>
-                <span class="history-detail">${item.detail}</span>
-            </div>
-            <div class="history-result">
-                ${item.result} ${item.isCrit ? '⭐' : ''} ${item.isFail ? '💀' : ''}
-            </div>
-        </div>
-    `).join('');
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Загрузка истории
-    const savedHistory = localStorage.getItem('dnd_roll_history');
-    if (savedHistory) {
-        try {
-            state.rollHistory = JSON.parse(savedHistory);
-        } catch (e) {
-            state.rollHistory = [];
-        }
-    }
-    renderHistory();
-    
-    const openBtn = document.getElementById('openDiceRoller');
-    const historyBtn = document.getElementById('openRollHistory');
-    const selector = document.getElementById('diceSelector');
-    const resultsPanel = document.getElementById('diceResults');
-    const historyPanel = document.getElementById('rollHistoryPanel');
-    
-    const rollBtn = document.getElementById('performRoll');
-    const closeSelectorBtn = document.getElementById('closeDiceSelector');
-    const closeResultsBtn = document.getElementById('closeDiceResults');
-    const closeHistoryBtn = document.getElementById('closeHistoryBtn');
-    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
-
-    if (openBtn) openBtn.addEventListener('click', () => selector.style.display = 'flex');
-    if (historyBtn) historyBtn.addEventListener('click', () => historyPanel.style.display = 'flex');
-    
-    if (closeSelectorBtn) closeSelectorBtn.addEventListener('click', () => selector.style.display = 'none');
-    if (closeResultsBtn) closeResultsBtn.addEventListener('click', () => resultsPanel.style.display = 'none');
-    if (closeHistoryBtn) closeHistoryBtn.addEventListener('click', () => historyPanel.style.display = 'none');
-
-    if (clearHistoryBtn) {
-        clearHistoryBtn.addEventListener('click', () => {
-            if (confirm('Очистить историю бросков?')) {
-                state.rollHistory = [];
-                renderHistory();
-                localStorage.setItem('dnd_roll_history', JSON.stringify([]));
-            }
-        });
-    }
-
-    if (rollBtn) {
-        rollBtn.addEventListener('click', () => {
-            const diceTypes = [
-                { sides: 4, count: parseInt(document.getElementById('countD4').value) || 0 },
-                { sides: 6, count: parseInt(document.getElementById('countD6').value) || 0 },
-                { sides: 8, count: parseInt(document.getElementById('countD8').value) || 0 },
-                { sides: 10, count: parseInt(document.getElementById('countD10').value) || 0 },
-                { sides: 12, count: parseInt(document.getElementById('countD12').value) || 0 },
-                { sides: 20, count: parseInt(document.getElementById('countD20').value) || 0 },
-                { sides: 100, count: parseInt(document.getElementById('countD100').value) || 0 }
-            ];
-
-            let html = '';
-            let grandTotal = 0;
-            let hasDice = false;
-            let allRollsSummary = [];
-
-            diceTypes.forEach(die => {
-                if (die.count > 0) {
-                    hasDice = true;
-                    let rolls = [];
-                    let typeTotal = 0;
-                    for (let i = 0; i < die.count; i++) {
-                        let r = Math.floor(Math.random() * die.sides) + 1;
-                        rolls.push(r);
-                        typeTotal += r;
-                    }
-                    grandTotal += typeTotal;
-                    
-                    let isCrit = die.sides === 20 && die.count === 1 && rolls[0] === 20;
-                    let isFail = die.sides === 20 && die.count === 1 && rolls[0] === 1;
-                    let status = isCrit ? '<span class="crit-text">⭐ КРИТ!</span>' : (isFail ? '<span class="fail-text"> ПРОВАЛ</span>' : '');
-                    
-                    html += `
-                        <div class="result-item">
-                            <div class="result-header">
-                                <span>D${die.sides} × ${die.count}</span>
-                                <span>${status}</span>
-                            </div>
-                            <div class="result-values">[${rolls.join(', ')}] = ${typeTotal}</div>
-                        </div>
-                    `;
-                    
-                    allRollsSummary.push({
-                        title: `D${die.sides} × ${die.count}`,
-                        detail: `[${rolls.join(', ')}]`,
-                        result: typeTotal,
-                        isCrit, isFail
-                    });
-                }
-            });
-
-            if (!hasDice) {
-                alert('Выберите хотя бы один кубик!');
-                return;
-            }
-
-            html += `<div class="result-total">ИТОГО: ${grandTotal}</div>`;
-            
-            const contentDiv = document.getElementById('diceResultsContent');
-            if (contentDiv) contentDiv.innerHTML = html;
-            
-            resultsPanel.style.display = 'flex';
-            selector.style.display = 'none';
-            
-            if (allRollsSummary.length === 1) {
-                addRollToHistory(allRollsSummary[0].title, allRollsSummary[0].detail, allRollsSummary[0].result, allRollsSummary[0].isCrit, allRollsSummary[0].isFail);
-            } else {
-                addRollToHistory(`Смешанный бросок`, `Всего кубиков: ${diceTypes.reduce((a, b) => a + b.count, 0)}`, grandTotal);
-            }
-            
-            setTimeout(() => {
-                resultsPanel.style.display = 'none';
-            }, 10000);
-        });
-    }
-
-    document.addEventListener('click', (e) => {
-        if (selector.style.display === 'flex' && !selector.contains(e.target) && e.target !== openBtn) {
-            selector.style.display = 'none';
-        }
-        if (historyPanel && historyPanel.style.display === 'flex' && !historyPanel.contains(e.target) && e.target !== historyBtn) {
-            historyPanel.style.display = 'none';
-        }
-    });
-});
 // Вызов импорта из файла (переиспользуем существующую логику)
 // Вызов импорта из файла (полная версия)
 // Вызов импорта из файла (полная версия с обходом блокировки)

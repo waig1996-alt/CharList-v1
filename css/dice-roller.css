@@ -1,0 +1,273 @@
+/* ===== КНОПКИ ===== */
+#openDiceRoller, #openRollHistory {
+    position: fixed;
+    z-index: 1000;
+    border: none;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+#openDiceRoller {
+    bottom: 20px;
+	right: 20px;
+    background: #4a3a2a;
+}
+
+#openDiceRoller:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+    background: #5a4a3a;
+}
+
+#openRollHistory {
+    bottom: 20px;
+	right: 200px;
+    background: #4a3a2a;
+}
+
+#openRollHistory:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+    background: #5a4a3a;
+}
+
+/* ===== ПАНЕЛИ ===== */
+.dice-panel {
+    position: fixed;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 24px;
+    padding: 16px;
+    z-index: 999;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--text-primary);
+    max-height: 80vh;
+}
+
+.dice-selector {
+    bottom: 80px;
+    right: 20px;
+    width: 340px;
+}
+
+.dice-results {
+    bottom: 80px;
+    left: 20px; /* Результат слева */
+    width: 350px;
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+.roll-history-panel {
+    bottom: 80px;
+    right: 20px;
+    width: 350px;
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+.dice-panel-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-align: center;
+    margin-bottom: 5px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ===== СЕТКА КУБИКОВ ===== */
+.dice-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.dice-option {
+    background: var(--stat-bg);
+    border: 1px solid var(--border-card);
+    border-radius: 20px;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.1s, border-color 0.2s;
+}
+
+.dice-option:hover {
+    background: var(--input-bg);
+}
+
+.dice-option.active {
+    border-color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.dice-label {
+    font-weight: bold;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.dice-count-badge {
+    background: var(--border-card);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--text-secondary);
+    min-width: 20px;
+    text-align: center;
+}
+
+.dice-option.active .dice-count-badge {
+    background: #8b5cf6;
+    color: white;
+}
+
+/* ===== КНОПКИ ДЕЙСТВИЙ ===== */
+.dice-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.dice-action-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 40px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.btn-roll {
+    background: #6d28d9;
+    color: white;
+}
+
+.btn-close {
+    background: var(--button-bg);
+    color: var(--button-text);
+}
+
+/* ===== РЕЗУЛЬТАТЫ ===== */
+.result-item {
+    background: var(--stat-bg);
+    padding: 10px;
+    border-radius: 15px;
+    margin-bottom: 8px;
+    border-left: 4px solid var(--stat-border);
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.result-values {
+    font-family: monospace;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.result-total {
+    background: var(--border-card);
+    color: var(--text-primary);
+    padding: 12px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-top: 10px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* ===== ИСТОРИЯ ===== */
+.history-item {
+    background: var(--stat-bg);
+    padding: 10px 12px;
+    border-radius: 16px;
+    margin-bottom: 8px;
+    border-left: 4px solid var(--stat-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: slideIn 0.2s ease-out;
+}
+
+.history-item .history-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.history-item .history-title {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.history-detail-list {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.history-dice-group {
+    background: rgba(0,0,0,0.05);
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+body.dark .history-dice-group {
+    background: rgba(255,255,255,0.1);
+}
+
+.history-item .history-result {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    padding: 4px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border-card);
+}
+
+.history-item.crit {
+    border-left-color: #4ade80;
+    background: rgba(74, 222, 128, 0.1);
+}
+
+.history-item.fail {
+    border-left-color: #f87171;
+    background: rgba(248, 113, 113, 0.1);
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
