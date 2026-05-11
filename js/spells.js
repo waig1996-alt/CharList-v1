@@ -79,7 +79,7 @@ async function castSpell(spell) {
         let attackBonus = attrMod + profBonusVal;
 
         if (spell.level === 0) {
-            rollD20(attackBonus, 'Заговор: ' + (spell.name), addToLog);
+            rollD20Unified(attackBonus, 'Заговор: ' + spell.name, 'spell');
             if (spell.damage) rollDamage(spell.damage, addToLog, 'Урон: ' + (spell.name));
             resolve(true);
             return;
@@ -144,7 +144,7 @@ async function castSpell(spell) {
                 addToLog(' Ячейка ' + selectedLevel + ' уровня');
             }
 
-            rollD20(attackBonus, 'Заклинание: ' + (spell.name), addToLog);
+            rollD20Unified(attackBonus, 'Заклинание: ' + spell.name, 'spell');
             if (finalDamage) rollDamage(finalDamage, addToLog, 'Урон: ' + (spell.name));
 
             overlay.remove();

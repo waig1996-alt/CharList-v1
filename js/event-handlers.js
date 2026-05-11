@@ -251,7 +251,7 @@ function initEventHandlers() {
     // === Пользовательский бросок ===
     document.getElementById('rollCustom')?.addEventListener('click', () => {
         let e = document.getElementById('customDice')?.value;
-        if (e) rollDamage(e, addToLog, 'Пользовательский бросок');
+        if (e) rollDamageUnified(e, 'Пользовательский бросок', 'custom');
     });
 
     document.getElementById('clearLog')?.addEventListener('click', () => {

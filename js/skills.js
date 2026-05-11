@@ -63,7 +63,7 @@ function renderSkills() {
         btn.onclick = () => {
             let bonus = parseInt(btn.dataset.bonus);
             let skillName = btn.parentElement.querySelector('.skill-name').innerText.trim();
-            rollD20(bonus, skillName, addToLog);
+            rollD20Unified(bonus, skillName, 'skill');
         };
     });
 }

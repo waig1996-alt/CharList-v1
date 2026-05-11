@@ -22,7 +22,7 @@ function renderAttacks() {
             let attrMod = getMod(a.attr);
             let prof = a.proficient ? getProfBonus() : 0;
             let attackBonus = attrMod + prof;
-            rollD20(attackBonus, 'Атака: ' + a.name, addToLog);
+            rollD20Unified(attackBonus, 'Атака: ' + a.name, 'attack');
         };
     });
 
@@ -31,7 +31,7 @@ function renderAttacks() {
             let idx = parseInt(btn.dataset.idx);
             let a = state.attacks[idx];
             if (!a) return;
-            rollDamage(a.dice, addToLog, 'Урон: ' + a.name);
+            rollDamageUnified(a.dice, 'Урон: ' + a.name, 'attack');
         };
     });
 

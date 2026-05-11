@@ -1,260 +1,309 @@
-/* ===== КНОПКИ ===== */
-#openDiceRoller, #openRollHistory {
-    position: fixed;
-    z-index: 1000;
-    border: none;
-    color: white;
-    padding: 12px 20px;
-    border-radius: 40px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 0.95rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-}
+/* ============ СТИЛИ ДЛЯ МОДАЛЬНОГО ОКНА РЕЗУЛЬТАТОВ БРОСКОВ ============ */
 
-#openDiceRoller {
-    bottom: 20px;
-	right: 20px;
-    background: #4a3a2a;
-}
-
-#openDiceRoller:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.5);
-    background: #5a4a3a;
-}
-
-#openRollHistory {
-    bottom: 20px;
-	right: 200px;
-    background: #4a3a2a;
-}
-
-#openRollHistory:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.5);
-    background: #5a4a3a;
-}
-
-/* ===== ПАНЕЛИ ===== */
-.dice-panel {
-    position: fixed;
-    background: var(--bg-card);
-    border: 1px solid var(--border-card);
-    border-radius: 24px;
-    padding: 16px;
-    z-index: 999;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+.roll-modal-overlay {
     display: none;
-    flex-direction: column;
-    gap: 10px;
-    color: var(--text-primary);
-    max-height: 80vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
 }
 
-.dice-selector {
-    bottom: 80px;
-    right: 20px;
-    width: 340px;
-}
-
-.dice-results {
-    bottom: 80px;
-    left: 20px; /* Результат слева */
-    width: 350px;
-    max-height: 450px;
-    overflow-y: auto;
-}
-
-.roll-history-panel {
-    bottom: 80px;
-    right: 20px;
-    width: 350px;
-    max-height: 450px;
-    overflow-y: auto;
-}
-
-.dice-panel-title {
-    font-weight: bold;
-    font-size: 1.1rem;
+.roll-modal-content {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid #8b5cf6;
+    border-radius: 20px;
+    padding: 30px;
+    min-width: 300px;
+    max-width: 400px;
     text-align: center;
-    margin-bottom: 5px;
-    color: var(--text-secondary);
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.3), 0 0 80px rgba(139, 92, 246, 0.1);
+    position: relative;
+    animation: rollModalAppear 0.3s ease-out;
+}
+
+@keyframes rollModalAppear {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.roll-badge {
+    background: #8b5cf6;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.roll-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #e2e8f0;
+    margin-bottom: 15px;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-/* ===== СЕТКА КУБИКОВ ===== */
+.roll-details {
+    margin: 20px 0;
+}
+
+.roll-formula {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.roll-main {
+    font-size: 1.1rem;
+    color: #94a3b8;
+}
+
+.roll-sub {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.roll-result {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #f8fafc;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    line-height: 1;
+    margin: 15px 0;
+}
+
+.roll-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.roll-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+}
+
+/* ============ СТИЛИ ДЛЯ ПАНЕЛИ БРОСКОВ КУБИКОВ ============ */
+
+.dice-roller-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1rem;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    transition: all 0.3s;
+}
+
+.dice-roller-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+}
+
+.dice-panel {
+    position: fixed;
+    z-index: 200;
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    border: 1px solid #8b5cf6;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    display: none;
+}
+
+.dice-selector {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 320px;
+}
+
+.dice-results {
+    top: 20px;
+    left: 20px;
+    max-width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.roll-history-panel {
+    top: 20px;
+    right: 20px;
+    max-width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.dice-panel-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #e2e8f0;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+}
+
 .dice-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
     margin-bottom: 15px;
 }
 
 .dice-option {
-    background: var(--stat-bg);
-    border: 1px solid var(--border-card);
-    border-radius: 20px;
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    background: rgba(139, 92, 246, 0.2);
+    border: 2px solid rgba(139, 92, 246, 0.4);
+    border-radius: 12px;
+    padding: 15px 10px;
+    text-align: center;
     cursor: pointer;
-    user-select: none;
-    transition: background 0.1s, border-color 0.2s;
+    transition: all 0.2s;
+    position: relative;
 }
 
 .dice-option:hover {
-    background: var(--input-bg);
+    background: rgba(139, 92, 246, 0.4);
+    border-color: #8b5cf6;
+    transform: scale(1.05);
 }
 
 .dice-option.active {
-    border-color: #8b5cf6;
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(139, 92, 246, 0.6);
+    border-color: #a78bfa;
 }
 
 .dice-label {
+    display: block;
+    font-size: 1.2rem;
     font-weight: bold;
-    font-size: 1rem;
-    color: var(--text-primary);
+    color: #e2e8f0;
 }
 
 .dice-count-badge {
-    background: var(--border-card);
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.9rem;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ef4444;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
     font-weight: bold;
-    color: var(--text-secondary);
-    min-width: 20px;
-    text-align: center;
 }
 
-.dice-option.active .dice-count-badge {
+.dice-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.dice-action-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.btn-roll {
     background: #8b5cf6;
     color: white;
 }
 
-/* ===== КНОПКИ ДЕЙСТВИЙ ===== */
-.dice-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.dice-action-btn {
-    flex: 1;
-    padding: 10px;
-    border-radius: 40px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 0.9rem;
-}
-
-.btn-roll {
-    background: #6d28d9;
-    color: white;
+.btn-roll:hover {
+    background: #7c3aed;
 }
 
 .btn-close {
-    background: var(--button-bg);
-    color: var(--button-text);
+    background: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
 }
 
-/* ===== РЕЗУЛЬТАТЫ ===== */
+.btn-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #f8fafc;
+}
+
 .result-item {
-    background: var(--stat-bg);
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 8px;
     padding: 10px;
-    border-radius: 15px;
     margin-bottom: 8px;
-    border-left: 4px solid var(--stat-border);
 }
 
 .result-header {
     display: flex;
     justify-content: space-between;
-    font-weight: bold;
-    font-size: 0.95rem;
-    margin-bottom: 4px;
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin-bottom: 5px;
 }
 
 .result-values {
-    font-family: monospace;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 1.1rem;
+    color: #e2e8f0;
+    font-weight: bold;
 }
 
 .result-total {
-    background: var(--border-card);
-    color: var(--text-primary);
-    padding: 12px;
-    border-radius: 15px;
-    text-align: center;
     font-size: 1.5rem;
-    font-weight: 800;
-    margin-top: 10px;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
-}
-
-/* ===== ИСТОРИЯ ===== */
-.history-item {
-    background: var(--stat-bg);
-    padding: 10px 12px;
-    border-radius: 16px;
-    margin-bottom: 8px;
-    border-left: 4px solid var(--stat-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    animation: slideIn 0.2s ease-out;
-}
-
-.history-item .history-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.history-item .history-title {
     font-weight: bold;
-    font-size: 0.9rem;
-    color: var(--text-primary);
+    color: #f8fafc;
+    text-align: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(139, 92, 246, 0.3);
 }
 
-.history-detail-list {
-    font-family: monospace;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.history-dice-group {
-    background: rgba(0,0,0,0.05);
-    padding: 1px 5px;
-    border-radius: 4px;
-}
-
-body.dark .history-dice-group {
-    background: rgba(255,255,255,0.1);
-}
-
-.history-item .history-result {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    background: var(--bg-card);
-    padding: 4px 10px;
-    border-radius: 10px;
-    border: 1px solid var(--border-card);
+.history-item {
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-left: 3px solid #8b5cf6;
 }
 
 .history-item.crit {
@@ -267,7 +316,39 @@ body.dark .history-dice-group {
     background: rgba(248, 113, 113, 0.1);
 }
 
-@keyframes slideIn {
-    from { opacity: 0; transform: translateX(-10px); }
-    to { opacity: 1; transform: translateX(0); }
+.history-info {
+    margin-bottom: 5px;
+}
+
+.history-title {
+    font-weight: bold;
+    color: #e2e8f0;
+    font-size: 0.9rem;
+}
+
+.history-result {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #f8fafc;
+}
+
+.history-detail-list {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 5px;
+}
+
+.history-dice-group {
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.small-btn {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    background: rgba(139, 92, 246, 0.3);
+    color: #e2e8f0;
 }

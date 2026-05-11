@@ -29,7 +29,7 @@ function renderSavingThrows() {
         container.appendChild(div);
 
         div.querySelector('.save-roll').onclick = () => {
-            rollD20(bonus, 'Спасбросок ' + saveNames[attr].trim(), addToLog);
+            rollD20Unified(bonus, 'Спасбросок ' + saveNames[attr].trim(), 'save');
         };
     });
 }
