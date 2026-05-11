@@ -39,15 +39,44 @@ function renderSpells() {
         let levelDisplay = s.level === 0 ? "Заговор" : 'ЯЗ ' + (s.level);
         let li = document.createElement('li');
         li.className = 'spell-item';
-        li.innerHTML = '<div><strong>✨ ' + (s.name) + ' (' + (levelDisplay) + ')</strong> <span style="font-size:0.7rem;">' + (s.attr.toUpperCase()) + '</span> <button class="spell-cast-btn dice" data-idx="' + (idx) + '">🎲</button> <button class="spell-desc-btn remove-btn" data-idx="' + (idx) + '" style="background:#3a6b3a;">📖 Описание</button> <button class="remove-spell remove-btn" data-idx="' + (idx) + '">🗑</button></div>';
+        li.innerHTML = '<div><strong>✨ ' + s.name + ' (' + levelDisplay + ')</strong> <span style="font-size:0.7rem;">' + s.attr.toUpperCase() + '</span></div>' +
+            '<div style="margin-top: 5px;">' +
+            '<button class="spell-attack-btn dice" data-idx="' + idx + '">🎲 Атака</button>' +
+            (s.damage ? '<button class="spell-damage-btn dice" data-idx="' + idx + '" style="background: #8b3c2a;">💥 Урон</button>' : '') +
+            '<button class="spell-desc-btn remove-btn" data-idx="' + idx + '" style="background:#3a6b3a;">📖 Описание</button>' +
+            '<button class="remove-spell remove-btn" data-idx="' + idx + '">🗑</button>' +
+            '</div>';
         container.appendChild(li);
     });
 
-    document.querySelectorAll('.spell-cast-btn').forEach(btn => {
+    document.querySelectorAll('.spell-attack-btn').forEach(btn => {
         btn.onclick = async (e) => {
             e.stopPropagation();
             let idx = parseInt(btn.dataset.idx);
-            if (state.spells[idx]) await castSpell(state.spells[idx]);
+            let spell = state.spells[idx];
+            if (!spell) return;
+            let spellAttr = spell.attr || 'wis';
+            let attrMod = getMod(spellAttr);
+            let profBonusVal = spell.proficient ? getProfBonus() : 0;
+            let attackBonus = attrMod + profBonusVal;
+
+            if (spell.level === 0) {
+                rollD20Unified(attackBonus, 'Заговор: ' + spell.name, 'spell');
+            } else {
+                // Для уровневых заклинаний — выбор ячейки и бросок
+                await castSpell(spell);
+            }
+        };
+    });
+
+    document.querySelectorAll('.spell-damage-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            let idx = parseInt(btn.dataset.idx);
+            let spell = state.spells[idx];
+            if (spell && spell.damage) {
+                rollDamageUnified(spell.damage, 'Урон: ' + spell.name, 'spell');
+            }
         };
     });
 
