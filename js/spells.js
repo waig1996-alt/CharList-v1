@@ -79,8 +79,9 @@ async function castSpell(spell) {
         let attackBonus = attrMod + profBonusVal;
 
         if (spell.level === 0) {
-            rollD20Unified(attackBonus, 'Заговор: ' + spell.name, 'spell');
-            if (spell.damage) rollDamage(spell.damage, addToLog, 'Урон: ' + (spell.name));
+            // Для заговоров: бросок атаки d20
+            let rollResult = rollD20Unified(attackBonus, 'Заговор: ' + spell.name, 'spell');
+            // Урон бросается отдельно кнопкой "Урон" в списке заклинаний
             resolve(true);
             return;
         }
@@ -144,8 +145,9 @@ async function castSpell(spell) {
                 addToLog(' Ячейка ' + selectedLevel + ' уровня');
             }
 
-            rollD20Unified(attackBonus, 'Заклинание: ' + spell.name, 'spell');
-            if (finalDamage) rollDamage(finalDamage, addToLog, 'Урон: ' + (spell.name));
+            // Бросок атаки d20
+            let rollResult = rollD20Unified(attackBonus, 'Заклинание: ' + spell.name, 'spell');
+            // Урон бросается отдельно кнопкой "Урон" или через dice-roller
 
             overlay.remove();
             autoSave();

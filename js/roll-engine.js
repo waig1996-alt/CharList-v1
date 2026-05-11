@@ -224,8 +224,10 @@ function getMod(attr) {
 
 function parseDamage(damageStr) {
     if (!damageStr) return null;
-    let match = damageStr.match(/(\d+)к(\d+)([+-]\d+)?/i);
-    if (!match) match = damageStr.match(/(\d+)d(\d+)([+-]\d+)?/i);
+    // Заменяем кириллическую к на латинскую d для унификации
+    let normalized = damageStr.replace(/к/gi, 'd').replace(/К/gi, 'D');
+    // Парсим: 1d8+3, 2d6, 1d10-1, 4d6
+    let match = normalized.match(/(\d+)d(\d+)([+-]\d+)?/i);
     if (!match) return null;
     return {
         count: parseInt(match[1]),
