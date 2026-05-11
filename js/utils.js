@@ -27,15 +27,15 @@ function showRollResultModal(title, total, dieResult, bonus, diceNotation) {
     modal.querySelector('.roll-title').textContent = title.toUpperCase();
     modal.querySelector('.roll-result').textContent = total;
     
-    let formulaText = `(${dieResult})`;
+    let formulaText = '(' + dieResult + ')';
     if (bonus !== undefined && bonus !== 0) {
-        formulaText += ` ${bonus > 0 ? '+' : ''}${bonus}`;
+        formulaText += ' ' + (bonus > 0 ? '+' : '') + bonus;
     }
     modal.querySelector('.roll-main').textContent = formulaText;
 
-    let subText = `(${diceNotation})`;
+    let subText = '(' + diceNotation + ')';
     if (bonus !== undefined && bonus !== 0) {
-        subText += ` ${bonus > 0 ? '+' : ''}${bonus}`;
+        subText += ' ' + (bonus > 0 ? '+' : '') + bonus;
     }
     modal.querySelector('.roll-sub').textContent = subText;
 
@@ -67,7 +67,7 @@ function closeRollModal() {
 function rollDamage(damageStr, addToLogCallback, title = "Урон") {
     let parsed = parseDamage(damageStr);
     if (!parsed) {
-        addToLogCallback(`❌ ${damageStr} не распознано`);
+        addToLogCallback('❌ ' + damageStr + ' не распознано');
         return null;
     }
     let totalDice = 0, rolls = [];
@@ -79,7 +79,7 @@ function rollDamage(damageStr, addToLogCallback, title = "Урон") {
     let total = totalDice + parsed.mod;
     
     // Модалка отключена — только лог
-    addToLogCallback(`🎲 Урон: ${rolls.join('+')}${parsed.mod >= 0 ? '+' + parsed.mod : parsed.mod}=${total}`);
+    addToLogCallback('🎲 Урон: ' + rolls.join('+') + (parsed.mod >= 0 ? '+' + parsed.mod : parsed.mod) + '=' + total);
     return total;
 }
 
@@ -103,11 +103,11 @@ function rollD20(bonus, label, addToLogCallback) {
     showRollResultModal(label, displayRoll, die, bonus, "1к20");
     
     if (isCritSuccess) {
-        addToLogCallback(`🎲 ${label}: ★ КРИТИЧЕСКИЙ УСПЕХ! ★ (${die}${bonus >= 0 ? '+' + bonus : bonus}=${die + bonus})`, 'color: #4ade80; font-weight: bold;');
+        addToLogCallback('🎲 ' + label + ': ★ КРИТИЧЕСКИЙ УСПЕХ! ★ (' + die + (bonus >= 0 ? '+' + bonus : bonus) + '=' + (die + bonus) + ')', 'color: #4ade80; font-weight: bold;');
     } else if (isCritFail) {
-        addToLogCallback(`🎲 ${label}: 💀 КРИТИЧЕСКИЙ ПРОВАЛ! 💀 (${die}${bonus >= 0 ? '+' + bonus : bonus}=${die + bonus})`, 'color: #f87171; font-weight: bold;');
+        addToLogCallback('🎲 ' + label + ': 💀 КРИТИЧЕСКИЙ ПРОВАЛ! 💀 (' + die + (bonus >= 0 ? '+' + bonus : bonus) + '=' + (die + bonus) + ')', 'color: #f87171; font-weight: bold;');
     } else {
-        addToLogCallback(`🎲 ${label}: ${die}${bonus >= 0 ? '+' + bonus : bonus}=${roll}`);
+        addToLogCallback('🎲 ' + label + ': ' + die + (bonus >= 0 ? '+' + bonus : bonus) + '=' + roll);
     }
     
     return roll;

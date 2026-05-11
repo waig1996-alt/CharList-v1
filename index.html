@@ -53,11 +53,11 @@
                     <div class="input-group"><button id="shortRestBtn" class="dice">🛌 Короткий отдых</button><button id="longRestBtn" class="dice">🏠 Долгий отдых</button></div>
                 </div>
             </div>
-            
+
             <div class="stat-card" data-card="saves"><div class="card-header"><h3>🛡️ Спасброски</h3><span class="collapse-icon">▼</span></div><div class="card-content"><div id="savingThrowsContainer" class="skills-grid"></div></div></div>
-            
+
             <div class="stat-card" data-card="skills"><div class="card-header"><h3>🎯 Навыки (выбери мастерство)</h3><span class="collapse-icon">▼</span></div><div class="card-content"><div id="skillsContainer" class="skills-grid"></div><div class="input-group"><input type="text" id="newSkillName" placeholder="Новый навык"><button id="addSkillBtn">➕ добавить</button></div></div></div>
-            
+
             <div class="stat-card" data-card="inventory">
                 <div class="card-header"><h3>🎒 Снаряжение</h3><span class="collapse-icon">▼</span></div>
                 <div class="card-content">
@@ -72,7 +72,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="stat-card" data-card="features"><div class="card-header"><h3>⭐ Способности / Языки</h3><span class="collapse-icon">▼</span></div><div class="card-content"><ul id="featuresList" class="features-list"></ul><div class="input-group"><input type="text" id="featureName" placeholder="Название" style="flex:1;"><input type="text" id="featureDesc" placeholder="Описание" style="flex:2;"><button id="addFeatureBtn">➕ добавить</button></div></div></div>
 
             <div class="stat-card" data-card="notes">
@@ -108,20 +108,20 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="stat-card" data-card="spells">
                 <div class="card-header"><h3>✨ Заклинания</h3><span class="collapse-icon">▼</span></div>
                 <div class="card-content">
                     <div class="inline-control"><strong>Атрибут заклинаний:</strong> <select id="spellcastingAttr"><option value="wis">Мудрость</option><option value="cha">Харизма</option><option value="int">Интеллект</option></select></div>
-                    
+
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <strong>📊 Ячейки заклинаний</strong>
                         <button id="restoreSlotsBtn" class="dice" style="background: #2c6e2c;">🔄 Восстановить все</button>
                     </div>
                     <div id="slotsList" style="margin-bottom:10px;"></div>
-                    
+
                     <div id="classResourceContainer" style="margin: 10px 0;"></div>
-                    
+
                     <div class="input-group"><input type="text" id="slotLevel" placeholder="Уровень (1-9)" style="width:100px;"><input type="number" id="slotTotal" placeholder="Макс" style="width:70px;"><input type="number" id="slotCurrent" placeholder="Тек" style="width:70px;"><button id="addSlotBtn">➕ добавить слот</button></div>
                     <hr>
                     <ul id="spellsList" class="spells-list"></ul>
@@ -143,7 +143,7 @@
                     <div class="formula-hint">При броске выбирай уровень ячейки — урон повысится на разницу в кубиках. Заговоры не тратят ячейки.</div>
                 </div>
             </div>
-            
+
             <div class="stat-card" data-card="log">
                 <div class="card-header"><h3>📜 Журнал</h3><span class="collapse-icon">▼</span></div>
                 <div class="card-content">
@@ -261,9 +261,61 @@
 </div>
 
 
-<!-- Подключение скриптов  -->
-<script src="js/dice-roller.js"></script>
+<!-- ============================================================ -->
+<!-- ПОРЯДОК ПОДКЛЮЧЕНИЯ СКРИПТОВ (КРИТИЧЕСКИ ВАЖЕН!)            -->
+<!-- Каждый скрипт добавляет глобальные функции/переменные.       -->
+<!-- Нижние скрипты могут использовать функции верхних.          -->
+<!-- ============================================================ -->
+
+<!-- 1. Утилиты (rollD20, rollDamage, parseDamage, модалки) -->
 <script src="js/utils.js"></script>
+
+<!-- 2. Глобальное состояние (state, APP_VERSION) -->
+<script src="js/state.js"></script>
+
+<!-- 3. Константы (classNames, classOptionsList, навыки, спасброски) -->
+<script src="js/constants.js"></script>
+
+<!-- 4. Базовые UI-функции (updateUI, addToLog, модалки заклинаний/заметок) -->
+<script src="js/ui-core.js"></script>
+
+<!-- 5. Инициализация персонажа (showClassSelectionModal, initNewCharacter) -->
+<script src="js/character-init.js"></script>
+
+<!-- 6. Мультиклассы (renderMulticlass, levelUpClass, recalcTotalLevel) -->
+<script src="js/multiclass.js"></script>
+
+<!-- 7. Спасброски (renderSavingThrows, getSaveBonus) -->
+<script src="js/saves.js"></script>
+
+<!-- 8. Навыки (renderSkills, getSkillBonus) -->
+<script src="js/skills.js"></script>
+
+<!-- 9. Атаки (renderAttacks) -->
+<script src="js/attacks.js"></script>
+
+<!-- 10. Заклинания (renderSpells, castSpell, renderSlots) -->
+<script src="js/spells.js"></script>
+
+<!-- 11. Классовые ресурсы (renderClassResource — 12 классов) -->
+<script src="js/class-resources.js"></script>
+
+<!-- 12. Инвентарь, способности, заметки (renderInventory, renderFeatures, renderNotes) -->
+<script src="js/inventory.js"></script>
+
+<!-- 13. Система хитов (heal, damage, rests, death saves) -->
+<script src="js/hp-system.js"></script>
+
+<!-- 14. Сохранение/загрузка (autoSave, loadData, import/export) -->
+<script src="js/storage.js"></script>
+
+<!-- 15. Обработчики событий (initEventHandlers — все кнопки) -->
+<script src="js/event-handlers.js"></script>
+
+<!-- 16. Бросок кубиков (dice-roller — независимый модуль) -->
+<script src="js/dice-roller.js"></script>
+
+<!-- 17. Точка входа (DOMContentLoaded, запуск приложения) -->
 <script src="js/app.js"></script>
 
 </body>

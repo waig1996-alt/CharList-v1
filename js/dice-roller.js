@@ -41,11 +41,11 @@ function incrementDiceCount(sides) {
 }
 
 function updateDiceDisplay(sides) {
-    const badge = document.getElementById(`badgeD${sides}`);
+    const badge = document.getElementById('badgeD' + sides);
     if (badge) {
         badge.textContent = window.currentDiceSelection[sides];
     }
-    const row = document.querySelector(`.dice-option[data-sides="${sides}"]`);
+    const row = document.querySelector('.dice-option[data-sides="' + sides + '"]');
     if (row) {
         if (window.currentDiceSelection[sides] > 0) {
             row.classList.add('active');
@@ -57,10 +57,10 @@ function updateDiceDisplay(sides) {
 
 function updateDiceBadges() {
     Object.keys(window.currentDiceSelection).forEach(sides => {
-        const badge = document.getElementById(`badgeD${sides}`);
+        const badge = document.getElementById('badgeD' + sides);
         if (badge) badge.textContent = window.currentDiceSelection[sides];
         
-        const row = document.querySelector(`.dice-option[data-sides="${sides}"]`);
+        const row = document.querySelector('.dice-option[data-sides="' + sides + '"]');
         if (row) {
             if (window.currentDiceSelection[sides] > 0) {
                 row.classList.add('active');
@@ -120,24 +120,22 @@ function performDiceRoll() {
             let isFail = die.sides === 20 && die.count === 1 && rolls[0] === 1;
             let status = isCrit ? '<span class="crit-text">⭐ КРИТ!</span>' : (isFail ? '<span class="fail-text"> ПРОВАЛ</span>' : '');
             
-            html += `
-                <div class="result-item">
-                    <div class="result-header">
-                        <span>D${die.sides} × ${die.count}</span>
-                        <span>${status}</span>
-                    </div>
-                    <div class="result-values">[${rolls.join(', ')}] = ${typeTotal}</div>
-                </div>
-            `;
+            html += '<div class="result-item">' +
+                '<div class="result-header">' +
+                '<span>D' + die.sides + ' × ' + die.count + '</span>' +
+                '<span>' + status + '</span>' +
+                '</div>' +
+                '<div class="result-values">[' + rolls.join(', ') + '] = ' + typeTotal + '</div>' +
+                '</div>';
             
             allRollsSummary.push({
-                title: `D${die.sides} × ${die.count}`,
-                detail: `[${rolls.join(', ')}]`,
+                title: 'D' + die.sides + ' × ' + die.count,
+                detail: '[' + rolls.join(', ') + ']',
                 result: typeTotal,
                 isCrit, isFail
             });
             
-            detailsForHistory.push({ label: `D${die.sides}x${die.count}`, rolls: rolls });
+            detailsForHistory.push({ label: 'D' + die.sides + 'x' + die.count, rolls: rolls });
         }
     });
 
@@ -146,7 +144,7 @@ function performDiceRoll() {
         return;
     }
 
-    html += `<div class="result-total">ИТОГО: ${grandTotal}</div>`;
+    html += '<div class="result-total">ИТОГО: ' + grandTotal + '</div>';
 
     const contentDiv = document.getElementById('diceResultsContent');
     if (contentDiv) contentDiv.innerHTML = html;
@@ -206,23 +204,21 @@ function renderHistory() {
     container.innerHTML = window.rollHistory.map(item => {
         let detailsHtml = '';
         if (item.details && item.details.length > 0) {
-            detailsHtml = `<div class="history-detail-list">
-                ${item.details.map(d => `<span class="history-dice-group">${d.label} [${d.rolls.join(', ')}]</span>`).join('; ')}
-            </div>`;
+            detailsHtml = '<div class="history-detail-list">' +
+                item.details.map(d => '<span class="history-dice-group">' + d.label + ' [' + d.rolls.join(', ') + ']</span>').join('; ') +
+                '</div>';
         }
         let statusClass = ''; let statusIcon = '';
         if (item.isCrit) { statusClass = 'crit'; statusIcon = ' ⭐'; }
         if (item.isFail) { statusClass = 'fail'; statusIcon = ' 💀'; }
 
-        return `
-            <div class="history-item ${statusClass}">
-                <div class="history-info">
-                    <span class="history-title">${item.title}${statusIcon}</span>
-                    ${detailsHtml}
-                </div>
-                <div class="history-result">${item.total}</div>
-            </div>
-        `;
+        return '<div class="history-item ' + statusClass + '">' +
+            '<div class="history-info">' +
+            '<span class="history-title">' + item.title + statusIcon + '</span>' +
+            detailsHtml +
+            '</div>' +
+            '<div class="history-result">' + item.total + '</div>' +
+            '</div>';
     }).join('');
 }
 
