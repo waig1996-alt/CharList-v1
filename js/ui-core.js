@@ -45,6 +45,11 @@ function updateUI() {
             spanEl.innerText = (mod >= 0 ? '+' : '') + mod;
         }
     });
+
+    // Обновить информацию о расе
+    if (typeof updateRaceDisplay === 'function') {
+        updateRaceDisplay();
+    }
 }
 
 function updateSpeedDisplay() {

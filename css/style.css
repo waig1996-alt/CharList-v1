@@ -688,6 +688,7 @@ body.dark .skill-name.proficient {
     margin-bottom: 4px;
 }
 
+
 .result-values {
     font-family: monospace;
     color: var(--text-secondary);

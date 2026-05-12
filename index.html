@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>D&D 5e Character Sheet</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/races.css">
     <link rel="stylesheet" href="css/dice-roller.css">
 <base target="_blank">
 </head>
@@ -12,7 +13,24 @@
 <div class="sheet-container">
     <div class="name-header">
         <label>Имя:</label><input type="text" id="charName" value="">
-        <label>Раса:</label><input type="text" id="charRace" value="">
+        <label>Раса:</label><select id="charRace">
+            <option value="">Выберите расу</option>
+            <option value="Человек">Человек</option>
+            <option value="Эльф">Эльф</option>
+            <option value="Полуэльф">Полуэльф</option>
+            <option value="Карлик">Карлик</option>
+            <option value="Гном">Гном</option>
+            <option value="Полурослик">Полурослик</option>
+            <option value="Драконорожденный">Драконорожденный</option>
+            <option value="Гнолл">Гнолл</option>
+            <option value="Полуорк">Полуорк</option>
+            <option value="Тифлинг">Тифлинг</option>
+            <option value="Эладрин">Эладрин</option>
+            <option value="Гоблин">Гоблин</option>
+            <option value="Орк">Орк</option>
+            <option value="Таур">Таур</option>
+            <option value="Хромозаур">Хромозаур</option>
+        </select>
         <button id="levelUpMainBtn" class="dice level-up-btn">⬆ Повысить уровень</button>
         <button id="collapseAllBtn" class="collapse-all-btn">📁 Свернуть все</button>
         <button id="expandAllBtn" class="collapse-all-btn">📂 Развернуть все</button>
@@ -26,6 +44,43 @@
             <div id="classesContainer"></div>
             <div style="margin-top:10px;"><strong>📊 Суммарный уровень:</strong> <span id="totalLevel">1</span></div>
             <button id="addClassBtn" class="small-btn">➕ Добавить класс</button>
+        </div>
+    </div>
+
+    <div class="stat-card" data-card="race">
+        <div class="card-header"><h3>🧬 Раса и способности</h3><span class="collapse-icon">▼</span></div>
+        <div class="card-content">
+            <div id="raceDisplayInfo" style="display: none;">
+                <div style="margin-bottom: 10px;">
+                    <strong>Выбранная раса:</strong> <span id="currentRaceDisplay" style="color: #2c6e2c; font-weight: bold;">-</span>
+                </div>
+                <div id="raceQuickInfo" style="background: #fff3e4; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.9rem;">
+                    <div><strong>Бонусы:</strong> <span id="raceBoostsSummary">-</span></div>
+                    <div><strong>Скорость:</strong> <span id="raceSpeedSummary">-</span></div>
+                    <div><strong>Тёмное зрение:</strong> <span id="raceDarkvisionSummary">-</span></div>
+                </div>
+                <div class="race-trait-panel">
+                    <div class="race-trait-actions">
+                        <label for="raceTraitSelect">Добавить черту</label>
+                        <select id="raceTraitSelect"></select>
+                        <button id="addRaceTraitBtn" class="small-btn">➕ Добавить</button>
+                    </div>
+                    <div class="race-trait-table-wrap">
+                        <table id="raceTraitsTable" class="race-traits-table">
+                            <thead>
+                                <tr><th>Черта</th><th>Что она даёт</th><th></th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <button id="viewRaceDetailsBtn" class="small-btn">👁️ Подробно</button>
+                <button id="changeRaceBtn" class="small-btn" style="background: #8b3c2a;">🔄 Изменить</button>
+            </div>
+            <div id="raceEmptyInfo" style="text-align: center; color: #7a582f; padding: 20px;">
+                <p>Выберите расу из списка выше →</p>
+                <p style="font-size: 0.9rem; opacity: 0.7;">Расовые бонусы помогут в развитии персонажа</p>
+            </div>
         </div>
     </div>
 
@@ -181,6 +236,56 @@
     </div>
 </div>
 
+<!-- Модальное окно информации о расе -->
+<div id="raceInfoModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content race-modal-content">
+        <div class="race-modal-header">
+            <h1 id="raceModalTitle">🧬 Раса</h1>
+            <button onclick="closeRaceModal()" class="race-modal-close">✕</button>
+        </div>
+        
+        <div class="race-description-box">
+            <p id="raceDescription"></p>
+        </div>
+        
+        <div class="race-stats-row">
+            <div class="race-stat-item">
+                <div class="race-stat-label">🏃 Скорость</div>
+                <div class="race-stat-value" id="raceSpeed">30 фт</div>
+            </div>
+            <div class="race-stat-item">
+                <div class="race-stat-label">👁️ Зрение</div>
+                <div class="race-stat-value" id="raceDarkvision">Нет</div>
+            </div>
+        </div>
+        
+        <div class="race-section">
+            <h3 class="race-section-title">📊 Бонусы к характеристикам</h3>
+            <div id="raceBoosts" class="race-boosts-grid"></div>
+        </div>
+
+        <div class="race-section">
+            <h3 class="race-section-title">⭐ Расовые способности</h3>
+            <ul id="raceTraits" class="race-traits-list"></ul>
+        </div>
+
+        <div class="race-section">
+            <h3 class="race-section-title">🗣️ Языки</h3>
+            <div id="raceLanguages" class="race-languages-box"></div>
+        </div>
+
+        <div id="raceResistancesSection" class="race-section" style="display: none;">
+            <h3 class="race-section-title">🛡️ Сопротивления</h3>
+            <div id="raceResistances" class="race-resistances-box"></div>
+        </div>
+
+        <div class="race-modal-buttons">
+            <button id="applyRaceBtn" class="race-apply-btn">✅ Применить бонусы</button>
+            <button onclick="closeRaceModal()" class="race-close-btn">❌ Закрыть</button>
+        </div>
+    </div>
+</div>
+
 <!-- Модальное окно для результатов бросков -->
 <div id="rollResultModal" class="roll-modal-overlay" style="display:none;">
     <div class="roll-modal-content">
@@ -285,6 +390,9 @@
 
 <!-- 5. Инициализация персонажа (showClassSelectionModal, initNewCharacter) -->
 <script src="js/character-init.js"></script>
+
+<!-- 5.5. Расы и расовые способности (getRaceData, applyRaceBoosts, openRaceModal) -->
+<script src="js/races.js"></script>
 
 <!-- 6. Мультиклассы (renderMulticlass, levelUpClass, recalcTotalLevel) -->
 <script src="js/multiclass.js"></script>

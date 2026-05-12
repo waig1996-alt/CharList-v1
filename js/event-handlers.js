@@ -317,6 +317,13 @@ function initEventHandlers() {
         state.charRace = document.getElementById('charRace').value;
         autoSave();
     });
+    document.getElementById('charRace')?.addEventListener('change', () => {
+        state.charRace = document.getElementById('charRace').value;
+        state.selectedRaceTraits = [];
+        updateRaceDisplay();
+        openRaceModal(state.charRace);
+        autoSave();
+    });
 
     // === Истощение ===
     document.getElementById('exhaustion')?.addEventListener('input', function () {
@@ -333,4 +340,75 @@ function initEventHandlers() {
         updateSpeedDisplay();
         autoSave();
     });
+
+    // === Кнопки расовых способностей ===
+    document.getElementById('viewRaceDetailsBtn')?.addEventListener('click', () => {
+        openRaceModal(state.charRace);
+    });
+    document.getElementById('changeRaceBtn')?.addEventListener('click', () => {
+        document.getElementById('charRace').value = '';
+        state.charRace = '';
+        state.selectedRaceTraits = [];
+        updateRaceDisplay();
+        autoSave();
+    });
+    document.getElementById('applyRaceBtn')?.addEventListener('click', () => {
+        applyAndCloseRaceModal(state.charRace);
+        updateRaceDisplay();
+    });
+
+    if (typeof initRaceTraitHandlers === 'function') {
+        initRaceTraitHandlers();
+    }
+}
+
+/**
+ * Обновить отображение информации о расе в карточке
+ */
+function updateRaceDisplay() {
+    const raceDisplayInfo = document.getElementById('raceDisplayInfo');
+    const raceEmptyInfo = document.getElementById('raceEmptyInfo');
+    
+    if (!state.charRace || state.charRace === '') {
+        raceDisplayInfo.style.display = 'none';
+        raceEmptyInfo.style.display = 'block';
+        return;
+    }
+
+    const raceData = getRaceData(state.charRace);
+    if (!raceData) {
+        raceDisplayInfo.style.display = 'none';
+        raceEmptyInfo.style.display = 'block';
+        return;
+    }
+
+    // Показать информацию о расе
+    raceEmptyInfo.style.display = 'none';
+    raceDisplayInfo.style.display = 'block';
+
+    // Обновить название расы
+    document.getElementById('currentRaceDisplay').textContent = raceData.name;
+
+    // Обновить краткую информацию о бонусах
+    const boostsSummary = Object.entries(raceData.abilityBoosts)
+        .filter(([, bonus]) => bonus !== 0)
+        .map(([ability, bonus]) => {
+            const abilityShort = { str: 'СИЛ', dex: 'ЛОВ', con: 'ТЕЛ', 
+                                   int: 'ИНТ', wis: 'МУД', cha: 'ХАР' };
+            const sign = bonus > 0 ? '+' : '';
+            return `${abilityShort[ability]} ${sign}${bonus}`;
+        })
+        .join(', ');
+    document.getElementById('raceBoostsSummary').textContent = boostsSummary || 'Нет';
+
+    // Скорость
+    document.getElementById('raceSpeedSummary').textContent = raceData.speed + ' фт';
+
+    // Тёмное зрение
+    document.getElementById('raceDarkvisionSummary').textContent = 
+        raceData.darkvision ? raceData.darkvision + ' фт' : 'Нет';
+
+    if (typeof updateRaceTraitUI === 'function') {
+        updateRaceTraitUI();
+    }
 }

@@ -1,0 +1,424 @@
+/* ===== Стили для модального окна расы ===== */
+
+.race-modal-content {
+    max-width: 700px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    padding: 0 !important;
+}
+
+.race-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 25px 20px 25px;
+    background: linear-gradient(135deg, #d4a574 0%, #c2975b 100%);
+    border-radius: 16px 16px 0 0;
+    border-bottom: 3px solid #8a6a3a;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+body.dark .race-modal-header {
+    background: linear-gradient(135deg, #8a6a3a 0%, #6a4a2a 100%);
+    border-bottom-color: #d4a574;
+}
+
+.race-modal-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    color: #2c1a12;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
+}
+
+body.dark .race-modal-header h1 {
+    color: #f0e0c0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.race-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #2c1a12;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+body.dark .race-modal-close {
+    color: #f0e0c0;
+}
+
+.race-modal-close:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.race-description-box {
+    padding: 20px 25px;
+    background: #fffaf2;
+    border-left: 4px solid #c2975b;
+    margin: 0 25px 20px 25px;
+    border-radius: 12px;
+    font-style: italic;
+    line-height: 1.6;
+    color: #3b2a1c;
+    font-size: 1rem;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
+}
+
+body.dark .race-description-box {
+    background: #2a221a;
+    border-left-color: #8a6a3a;
+    color: #e0c0a0;
+}
+
+#raceDescription {
+    margin: 0;
+}
+
+.race-stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    padding: 0 25px 20px 25px;
+}
+
+.race-stat-item {
+    background: #f5ede0;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid #d4a574;
+    text-align: center;
+}
+
+body.dark .race-stat-item {
+    background: #2a221c;
+    border-color: #6a4a2a;
+}
+
+.race-stat-label {
+    font-size: 0.85rem;
+    color: #7a582f;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+body.dark .race-stat-label {
+    color: #c0a070;
+}
+
+.race-stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #2c1a12;
+}
+
+body.dark .race-stat-value {
+    color: #f0e0c0;
+}
+
+.race-section {
+    padding: 0 25px 20px 25px;
+}
+
+.race-section-title {
+    font-size: 1.1rem;
+    color: #f0e0c0;
+    margin: 0 0 12px 0;
+    padding: 10px 0;
+    border-bottom: 2px solid #d4a574;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+body.dark .race-section-title {
+    color: #f0e0c0;
+    border-bottom-color: #8a6a3a;
+}
+
+.race-boosts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.race-boost-item {
+    background: #fff9f1;
+    padding: 14px 12px;
+    border-radius: 12px;
+    border: 2px solid #d4a574;
+    text-align: center;
+    font-weight: 700;
+    color: #3c2a18;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+}
+
+body.dark .race-boost-item {
+    background: linear-gradient(135deg, #2a221c 0%, #3a3228 100%);
+    border-color: #6ec36e;
+    color: #f0e0c0;
+}
+
+.race-boost-item strong {
+    display: block;
+    color: #1f4f20;
+    font-size: 1.4rem;
+    margin-top: 8px;
+}
+
+body.dark .race-boost-item strong {
+    color: #90ee90;
+}
+
+.race-traits-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.race-traits-list li {
+    background: #fffaf2;
+    padding: 14px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    border: 2px solid #d4a574;
+    line-height: 1.6;
+    color: #3b2a1d;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+}
+
+body.dark .race-traits-list li {
+    background: linear-gradient(135deg, #2a221c 0%, #3a3228 100%);
+    border-color: #8a6a3a;
+    color: #e0c0a0;
+}
+
+.race-languages-box,
+.race-resistances-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.race-badge {
+    display: inline-block;
+    background: #f6e5cd;
+    color: #3a2414;
+    padding: 10px 18px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 2px solid #d4a574;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+body.dark .race-badge {
+    background: linear-gradient(135deg, #8a6a3a 0%, #6a4a2a 100%);
+    color: #f0e0c0;
+    border-color: #a0754a;
+}
+
+.race-modal-buttons {
+    display: flex;
+    gap: 12px;
+    padding: 20px 25px;
+    background: #f9f6f1;
+    border-top: 1px solid #d4a574;
+    border-radius: 0 0 16px 16px;
+}
+
+body.dark .race-modal-buttons {
+    background: #1e1612;
+    border-top-color: #6a4a2a;
+}
+
+.race-apply-btn,
+.race-close-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.race-apply-btn {
+    background: linear-gradient(135deg, #2c6e2c 0%, #1e4620 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(44,110,44,0.3);
+}
+
+.race-apply-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(44,110,44,0.4);
+}
+
+.race-close-btn {
+    background: linear-gradient(135deg, #8b3c2a 0%, #6b2c1a 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(139,60,42,0.3);
+}
+
+.race-close-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(139,60,42,0.4);
+}
+
+body.dark .race-apply-btn {
+    box-shadow: 0 4px 12px rgba(110,195,110,0.2);
+}
+
+body.dark .race-apply-btn:hover {
+    box-shadow: 0 6px 16px rgba(110,195,110,0.3);
+}
+
+.race-trait-panel {
+    margin: 15px 0 20px;
+    background: #fff9f1;
+    border: 1px solid #e3cda7;
+    border-radius: 14px;
+    padding: 14px;
+}
+
+body.dark .race-trait-panel {
+    background: #2f271f;
+    border-color: #5e4a3a;
+}
+
+.race-trait-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.race-trait-actions label {
+    font-weight: 700;
+    color: #5d4426;
+    min-width: 120px;
+}
+
+body.dark .race-trait-actions label {
+    color: #e6d0aa;
+}
+
+.race-trait-actions select {
+    flex: 1;
+    min-width: 180px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid #d6b58d;
+    background: #fffdf7;
+    color: #3b2a18;
+}
+
+body.dark .race-trait-actions select {
+    background: #3a3228;
+    border-color: #7a6248;
+    color: #f0e0c0;
+}
+
+.race-traits-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+}
+
+.race-traits-table th,
+.race-traits-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e7d3b6;
+    vertical-align: top;
+}
+
+body.dark .race-traits-table th,
+body.dark .race-traits-table td {
+    border-color: #5e4a3a;
+}
+
+.race-traits-table th {
+    text-align: left;
+    font-size: 0.92rem;
+    color: #5f432a;
+    font-weight: 700;
+}
+
+body.dark .race-traits-table th {
+    color: #d9c4a1;
+}
+
+.race-trait-btn {
+    width: 100%;
+    text-align: left;
+    background: #f2e4d0;
+    border: 1px solid #d5b38a;
+    border-radius: 12px;
+    padding: 10px 12px;
+    color: #3c281b;
+    font-weight: 700;
+    cursor: default;
+}
+
+body.dark .race-trait-btn {
+    background: #3b3228;
+    border-color: #7d6d57;
+    color: #f1e1c2;
+}
+
+.race-trait-desc {
+    color: #4b3926;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+body.dark .race-trait-desc {
+    color: #d7c5a3;
+}
+
+.race-trait-remove-cell {
+    width: 48px;
+    text-align: center;
+}
+
+.race-trait-remove-btn {
+    background: #d97b68;
+    border: none;
+    color: white;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.race-trait-remove-btn:hover {
+    background: #b65b45;
+}
+
+body.dark .race-trait-remove-btn {
+    background: #a56042;
+}
+
+body.dark .race-trait-remove-btn:hover {
+    background: #8a4c2f;
+}
+
+body.dark .race-close-btn {
+    box-shadow: 0 4px 12px rgba(200,100,80,0.2);
+}
+
+body.dark .race-close-btn:hover {
+    box-shadow: 0 6px 16px rgba(200,100,80,0.3);
+}
+

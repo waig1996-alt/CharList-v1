@@ -23,6 +23,8 @@ function autoSave() {
         profBonus: state.profBonus,
         charName: state.charName,
         charRace: state.charRace,
+        appliedRaceBoosts: state.appliedRaceBoosts,
+        selectedRaceTraits: state.selectedRaceTraits,
         stats: state.stats,
         money: state.money,
         hpHistory: state.hpHistory,
@@ -75,6 +77,8 @@ function loadData() {
             state.profBonus = d.profBonus || 2;
             state.charName = d.charName || "";
             state.charRace = d.charRace || "";
+            state.appliedRaceBoosts = d.appliedRaceBoosts || null;
+            state.selectedRaceTraits = d.selectedRaceTraits || [];
             state.hpHistory = d.hpHistory || [];
             state.manualHpEnabled = true; // Принудительно включаем ручное редактирование
 
@@ -167,6 +171,8 @@ async function saveToFile() {
         stats: state.stats,
         charName: state.charName,
         charRace: state.charRace,
+        appliedRaceBoosts: state.appliedRaceBoosts,
+        selectedRaceTraits: state.selectedRaceTraits,
         hpHistory: state.hpHistory,
         manualHpEnabled: state.manualHpEnabled,
         classResources: state.classResources
@@ -252,6 +258,8 @@ function importCharacterData(data) {
     state.manualHpEnabled = data.manualHpEnabled || false;
     state.charName = data.charName || "";
     state.charRace = data.charRace || "";
+    state.appliedRaceBoosts = data.appliedRaceBoosts || null;
+    state.selectedRaceTraits = data.selectedRaceTraits || [];
     state.hpHistory = data.hpHistory || [];
 
     if (data.classResources) state.classResources = data.classResources;
