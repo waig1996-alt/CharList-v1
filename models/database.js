@@ -1,0 +1,106 @@
+const fs = require('fs');
+const path = require('path');
+const { Sequelize, DataTypes, Model } = require('sequelize');
+
+const dataDir = path.join(__dirname, '..', 'data');
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+}
+
+const sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: path.join(dataDir, 'database.sqlite'),
+    logging: false
+});
+
+class Character extends Model {}
+Character.init({
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'Безымянный'
+    },
+    sheetData: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        defaultValue: '{}'
+    },
+    tags: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        defaultValue: '[]'
+    }
+}, { sequelize, modelName: 'Character' });
+
+class Spell extends Model {}
+Spell.init({
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    description: {
+        type: DataTypes.TEXT,
+        allowNull: false
+    },
+    level: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+    },
+    school: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: ''
+    },
+    jsonData: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        defaultValue: '{}'
+    }
+}, { sequelize, modelName: 'Spell' });
+
+class Race extends Model {}
+Race.init({
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    description: {
+        type: DataTypes.TEXT,
+        allowNull: false
+    },
+    traits: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        defaultValue: '[]'
+    },
+    jsonData: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        defaultValue: '{}'
+    }
+}, { sequelize, modelName: 'Race' });
+
+class ClassModel extends Model {}
+ClassModel.init({
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    description: {
+        type: DataTypes.TEXT,
+        allowNull: false
+    },
+    hitDice: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: ''
+    },
+    jsonData: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        defaultValue: '{}'
+    }
+}, { sequelize, modelName: 'ClassModel' });
+
+module.exports = { sequelize, Character, Spell, Race, ClassModel };

@@ -47,6 +47,6 @@ const state = {
 };
 
 // ============ ВЕРСИЯ ПРОЕКТА ============
-const APP_VERSION = "1.0.4";
+const APP_VERSION = "1.0.5";
 const STORAGE_VERSION_KEY = "dnd_sheet_version";
 const STORAGE_DATA_KEY = "dnd_master_sheet_full";

@@ -34,6 +34,31 @@ project/
 2. **Не требуется сервер** — работает через `file://`
 3. **Не используется `type="module"`** — все скрипты глобальные
 
+## 🗄️ Backend и SQLite
+
+Для работы с базой данных добавлен минимальный Node-сервер.
+
+- Файл сервера: `server.js`
+- Модели: `models/database.js`
+- Путь к базе: `data/database.sqlite`
+
+Запуск сервера:
+
+```bash
+npm start
+```
+
+После запуска можно обращаться к API:
+
+- `GET /api/status`
+- `GET /api/characters`
+- `POST /api/characters`
+- `GET /api/spells`
+- `GET /api/races`
+- `GET /api/classes`
+
+Статические файлы доступны по адресу `http://localhost:3000/`.
+
 ## ✅ Чек-лист проверки после рефакторинга
 
 ### Базовый функционал
