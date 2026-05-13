@@ -4,6 +4,7 @@
 const state = {
     spells: [],
     spellSlots: [],
+    pinnedSpells: [],
     attacks: [],
     inventoryItems: [],
     features: [],
@@ -47,6 +48,6 @@ const state = {
 };
 
 // ============ ВЕРСИЯ ПРОЕКТА ============
-const APP_VERSION = "1.0.7";
+const APP_VERSION = "1.0.75";
 const STORAGE_VERSION_KEY = "dnd_sheet_version";
 const STORAGE_DATA_KEY = "dnd_master_sheet_full";

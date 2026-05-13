@@ -1,0 +1,289 @@
+/* ============ ОФОРМЛЕНИЕ ЗАКЛИНАНИЙ ============ */
+
+/* Контейнер для ячеек слотов */
+.slot-row {
+    background: linear-gradient(135deg, #e6f3f7, #e6f2ff);
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border-left: 4px solid #4a90c9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.95rem;
+}
+
+.slot-row input {
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.slot-row strong {
+    color: #2c5aa0;
+    min-width: 100px;
+}
+
+/* Секция заклинаний по уровню */
+.spell-level-section {
+    margin: 20px 0;
+    padding: 10px 0;
+    border-top: 2px solid #e0e0e0;
+}
+
+.spell-level-header {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #4a3f35;
+    margin: 10px 0 8px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #d0c0b0;
+}
+
+/* Карточка заклинания */
+.spell-card {
+    background: linear-gradient(135deg, #faf8f4, #f5f0eb);
+    border: 1px solid #d0c0b0;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+    transition: all 0.2s ease;
+}
+
+.spell-card:hover {
+    background: linear-gradient(135deg, #f5f0eb, #ede8e0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateX(2px);
+}
+
+.spell-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #3a3a3a;
+}
+
+.spell-card-header strong {
+    font-size: 1rem;
+    flex: 1;
+}
+
+.spell-action {
+    background: #e8d4b8;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: normal;
+    color: #5a4a3a;
+    white-space: nowrap;
+    margin-left: 10px;
+}
+
+/* Мета информация заклинания */
+.spell-card-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: #6a5a4a;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.spell-card-meta span {
+    background: #f0e8e0;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+/* Описание заклинания */
+.spell-card-desc {
+    background: #fffbf7;
+    padding: 8px 10px;
+    border-left: 3px solid #d4a574;
+    margin: 8px 0;
+    font-size: 0.9rem;
+    color: #5a5a5a;
+    border-radius: 4px;
+}
+
+/* Действия с заклинанием */
+.spell-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.spell-card-actions button {
+    flex: 1;
+    min-width: 80px;
+    font-size: 0.85rem;
+    padding: 6px 10px;
+}
+
+/* Закреплённые заклинания */
+.pinned-spells-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 3px solid #8b6914;
+}
+
+.pinned-spell-card {
+    background: linear-gradient(135deg, #fff8e6, #fff3d9);
+    border: 2px solid #d4a574;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+}
+
+.pinned-spell-card .spell-card-header strong::before {
+    content: "📌 ";
+    margin-right: 5px;
+}
+
+/* Список заклинаний */
+.spells-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Inline control для атрибута заклинаний */
+.inline-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.inline-control select {
+    flex: 1;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+/* Подсказка формулы */
+.formula-hint {
+    background: #e8f5f7;
+    border-left: 4px solid #4a90c9;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #2c5aa0;
+    opacity: 0.8;
+}
+
+/* Информационный блок ячеек */
+#slotsList {
+    margin: 10px 0;
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 6px;
+}
+
+/* Кнопки управления */
+button.dice {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+button.dice:hover {
+    transform: scale(1.05);
+}
+
+button.dice:active {
+    transform: scale(0.95);
+}
+
+/* Тёмная тема поддержка */
+@media (prefers-color-scheme: dark) {
+    .spell-card {
+        background: linear-gradient(135deg, #2a2620, #3a342a);
+        border-color: #5a4a3a;
+        color: #e0d0c0;
+    }
+
+    .spell-card:hover {
+        background: linear-gradient(135deg, #3a342a, #4a4034);
+    }
+
+    .spell-card-header strong {
+        color: #f0e0d0;
+    }
+
+    .spell-action {
+        background: #4a3a2a;
+        color: #e0d0c0;
+    }
+
+    .spell-card-meta {
+        color: #c0b0a0;
+    }
+
+    .spell-card-meta span {
+        background: #3a3430;
+        color: #d0c0b0;
+    }
+
+    .spell-card-desc {
+        background: #2a2420;
+        color: #d0c0b0;
+        border-color: #6a5a4a;
+    }
+
+    .slot-row {
+        background: linear-gradient(135deg, #2a3a4a, #1a2a3a);
+        border-color: #4a6a8a;
+        color: #c0d0e0;
+    }
+
+    .slot-row strong {
+        color: #7a9abf;
+    }
+
+    .pinned-spell-card {
+        background: linear-gradient(135deg, #3a3020, #4a3a2a);
+        border-color: #6a5a3a;
+    }
+
+    .formula-hint {
+        background: #1a2a3a;
+        border-color: #4a6a8a;
+        color: #7a9abf;
+    }
+}
+
+/* Адаптивный дизайн */
+@media (max-width: 768px) {
+    .spell-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .spell-action {
+        margin-left: 0;
+        margin-top: 8px;
+    }
+
+    .spell-card-meta {
+        flex-direction: column;
+    }
+
+    .spell-card-actions {
+        flex-direction: column;
+    }
+
+    .spell-card-actions button {
+        min-width: 100%;
+    }
+
+    .slot-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

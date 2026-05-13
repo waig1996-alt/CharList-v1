@@ -69,6 +69,8 @@ function renderMulticlass() {
             updateMaxHp();
             renderSavingThrows();
             renderClassResource();
+            recalculateSpellSlots();
+            renderSlots();
             autoSave();
         };
     });
@@ -82,6 +84,8 @@ function renderMulticlass() {
                 recalcTotalLevel();
                 renderMulticlass();
                 renderSavingThrows();
+                recalculateSpellSlots();
+                renderSlots();
                 autoSave();
             }
         };

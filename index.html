@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/races.css">
     <link rel="stylesheet" href="css/dice-roller.css">
+    <link rel="stylesheet" href="css/spells.css">
 <base target="_blank">
 </head>
 <body>
@@ -185,7 +186,7 @@
                         <input type="text" id="spellDamage" placeholder="Урон (1к6+3)" value="1к6" style="width:95px;">
                         <input type="text" id="spellDesc" placeholder="Описание" style="width:140px;">
                         <button id="addSpellBtn" class="dice">📖 добавить</button>
-                        <button id="importJsonBtn" class="dice import-btn" style="background:#2c6e2c;">📂 Импорт JSON</button>
+                        <button id="addPinnedBtn" class="dice" style="background:#8b6914;">📌 закрепить</button>
                     </div>
                     <div class="formula-hint">При броске выбирай уровень ячейки — урон повысится на разницу в кубиках. Заговоры не тратят ячейки.</div>
                 </div>
@@ -397,6 +398,9 @@
 
 <!-- 9. Атаки (renderAttacks) -->
 <script src="js/attacks.js"></script>
+
+<!-- 9.5 Таблицы ячеек заклинаний (для всех типов кастеров) -->
+<script src="js/spell-slots-tables.js"></script>
 
 <!-- 10. Заклинания (renderSpells, castSpell, renderSlots) -->
 <script src="js/spells.js"></script>

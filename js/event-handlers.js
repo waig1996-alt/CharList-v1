@@ -69,27 +69,9 @@ function initEventHandlers() {
     });
 
     // === Заклинания ===
-    document.getElementById('addSpellBtn')?.addEventListener('click', () => {
-        let name = document.getElementById('spellName')?.value.trim();
-        let levelVal = document.getElementById('spellLevel')?.value || '1';
-        let attr = document.getElementById('spellAttr')?.value || 'wis';
-        let proficient = document.getElementById('spellProficient')?.checked;
-        let damage = document.getElementById('spellDamage')?.value.trim();
-        let desc = document.getElementById('spellDesc')?.value.trim();
-        if (!name) {
-            addToLog('❌ Укажите название заклинания');
-            return;
-        }
-        let level = parseInt(levelVal);
-        if (isNaN(level)) level = 0;
-        state.spells.push({ name: name, level: level, attr: attr, proficient: proficient, damage: damage, desc: desc });
-        renderSpells();
-        document.getElementById('spellName').value = '';
-        document.getElementById('spellDamage').value = '1к6';
-        document.getElementById('spellDesc').value = '';
-        addToLog('✨ Добавлено заклинание: ' + name);
-        autoSave();
-    });
+    document.getElementById('addSpellBtn')?.addEventListener('click', addSpell);
+    
+    document.getElementById('addPinnedBtn')?.addEventListener('click', addPinnedSpell);
 
     // === Слоты заклинаний ===
     document.getElementById('addSlotBtn')?.addEventListener('click', () => {
