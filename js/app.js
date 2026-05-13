@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     checkAndMigrateVersion();
 
+    if (typeof loadRaceOptionsFromDb === 'function') {
+        await loadRaceOptionsFromDb();
+    }
+
     const saved = localStorage.getItem(STORAGE_DATA_KEY);
     let savedData = null;
     let hasSavedData = false;

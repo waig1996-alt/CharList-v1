@@ -4,6 +4,7 @@
     "seed:races": "node seed-races.js",
     "seed:classes": "node seed-classes.js",
     "seed:spells": "node seed-spells.js",
+    "seed:spell-data": "node seed-spell-data.js",
     "seed:all": "npm run seed:races && npm run seed:classes && npm run seed:spells"
   },
   "dependencies": {

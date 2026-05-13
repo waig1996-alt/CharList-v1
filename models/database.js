@@ -103,4 +103,27 @@ ClassModel.init({
     }
 }, { sequelize, modelName: 'ClassModel' });
 
-module.exports = { sequelize, Character, Spell, Race, ClassModel };
+class ClassSpell extends Model {}
+ClassSpell.init({
+    className: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    classNameRu: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    spellId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    spellName: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+}, { sequelize, modelName: 'ClassSpell' });
+
+Spell.hasMany(ClassSpell, { foreignKey: 'spellId', as: 'classLinks' });
+ClassSpell.belongsTo(Spell, { foreignKey: 'spellId', as: 'spell' });
+
+module.exports = { sequelize, Character, Spell, Race, ClassModel, ClassSpell };

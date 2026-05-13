@@ -223,6 +223,79 @@ const races = {
     }
 };
 
+function parseRaceRecord(record) {
+    let jsonData = {};
+    try {
+        jsonData = typeof record.jsonData === 'string' ? JSON.parse(record.jsonData) : record.jsonData || {};
+    } catch (error) {
+        console.warn('Не удалось разобрать jsonData для расы', record.name, error);
+        jsonData = {};
+    }
+
+    let traits = [];
+    try {
+        if (typeof record.traits === 'string') {
+            traits = JSON.parse(record.traits);
+        } else if (Array.isArray(record.traits)) {
+            traits = record.traits;
+        } else {
+            traits = [];
+        }
+    } catch (error) {
+        console.warn('Не удалось разобрать traits для расы', record.name, error);
+        traits = [];
+    }
+
+    return {
+        name: record.name,
+        description: record.description || '',
+        traits,
+        abilityBoosts: jsonData.abilityBoosts || {},
+        speed: jsonData.speed || 0,
+        darkvision: jsonData.darkvision || 0,
+        languages: jsonData.languages || [],
+        resistances: jsonData.resistances || []
+    };
+}
+
+async function loadRaceOptionsFromDb() {
+    const select = document.getElementById('charRace');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">Выберите расу</option>';
+
+    try {
+        const response = await fetch('/api/races');
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+        }
+        const raceRows = await response.json();
+        if (!Array.isArray(raceRows) || raceRows.length === 0) {
+            throw new Error('Empty race list from DB');
+        }
+
+        raceRows.sort((a, b) => a.name.localeCompare(b.name, 'ru')); 
+
+        raceRows.forEach((raceRow) => {
+            const raceData = parseRaceRecord(raceRow);
+            races[raceData.name] = raceData;
+
+            const option = document.createElement('option');
+            option.value = raceData.name;
+            option.textContent = raceData.name;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Ошибка загрузки рас из БД:', error);
+        Object.keys(races).sort((a, b) => a.localeCompare(b, 'ru')).forEach((raceName) => {
+            const option = document.createElement('option');
+            option.value = raceName;
+            option.textContent = raceName;
+            select.appendChild(option);
+        });
+    }
+}
+
 /**
  * Получить данные расы
  */
