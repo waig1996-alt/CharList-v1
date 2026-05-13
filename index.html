@@ -59,6 +59,12 @@
                     <div><strong>Скорость:</strong> <span id="raceSpeedSummary">-</span></div>
                     <div><strong>Тёмное зрение:</strong> <span id="raceDarkvisionSummary">-</span></div>
                 </div>
+                <div class="race-trait-list-block">
+                    <div class="race-trait-list-title">Список расовых черт</div>
+                    <div id="raceTraitList" class="race-trait-list-box">
+                        <p style="opacity:0.7; margin:0;">Выберите расу, чтобы увидеть её черты.</p>
+                    </div>
+                </div>
                 <div class="race-trait-panel">
                     <div class="race-trait-actions">
                         <label for="raceTraitSelect">Добавить черту</label>
@@ -393,6 +399,7 @@
 
 <!-- 5.5. Расы и расовые способности (getRaceData, applyRaceBoosts, openRaceModal) -->
 <script src="js/races.js"></script>
+<script src="js/race-traits.js"></script>
 
 <!-- 6. Мультиклассы (renderMulticlass, levelUpClass, recalcTotalLevel) -->
 <script src="js/multiclass.js"></script>

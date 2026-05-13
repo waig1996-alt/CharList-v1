@@ -2,7 +2,9 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const { Sequelize, Op } = require('sequelize');
 const { sequelize, Character, Spell, Race, ClassModel } = require('./models/database');
+const { raceSeed, classSeed, spellSeed } = require('./models/seed-data');
 
 const PORT = process.env.PORT || 3000;
 const publicRoot = path.join(__dirname);
@@ -72,6 +74,58 @@ function normalizeObjectData(obj) {
     return obj;
 }
 
+async function seedRacesIfEmpty() {
+    const count = await Race.count();
+    if (count > 0) {
+        return;
+    }
+
+    const records = raceSeed.map(race => ({
+        name: race.name,
+        description: race.description,
+        traits: JSON.stringify(race.traits),
+        jsonData: JSON.stringify(race.jsonData)
+    }));
+
+    await Race.bulkCreate(records);
+    console.log(`Seeded ${records.length} races into the database.`);
+}
+
+async function seedClassesIfEmpty() {
+    const count = await ClassModel.count();
+    if (count > 0) {
+        return;
+    }
+
+    const records = classSeed.map(cls => ({
+        name: cls.name,
+        description: cls.description,
+        hitDice: cls.hitDice,
+        jsonData: JSON.stringify(cls.jsonData)
+    }));
+
+    await ClassModel.bulkCreate(records);
+    console.log(`Seeded ${records.length} classes into the database.`);
+}
+
+async function seedSpellsIfEmpty() {
+    const count = await Spell.count();
+    if (count > 0) {
+        return;
+    }
+
+    const records = spellSeed.map(spell => ({
+        name: spell.name,
+        description: spell.description,
+        level: spell.level,
+        school: spell.school,
+        jsonData: JSON.stringify(spell.jsonData)
+    }));
+
+    await Spell.bulkCreate(records);
+    console.log(`Seeded ${records.length} spells into the database.`);
+}
+
 async function handleApi(req, res, pathname) {
     const method = req.method;
 
@@ -112,7 +166,21 @@ async function handleApi(req, res, pathname) {
 
     if (pathname === '/api/spells') {
         if (method === 'GET') {
-            const rows = await Spell.findAll({ order: [['name', 'ASC']] });
+            const query = url.parse(req.url, true).query;
+            let where = {};
+            if (query.name) {
+                where.name = { [Op.like]: `%${query.name}%` };
+            }
+            if (query.level) {
+                where.level = query.level;
+            }
+            if (query.school) {
+                where.school = { [Op.like]: `%${query.school}%` };
+            }
+            if (query.id) {
+                where.id = query.id;
+            }
+            const rows = await Spell.findAll({ where, order: [['level', 'ASC'], ['name', 'ASC']] });
             return sendJson(res, rows.map(row => row.toJSON()));
         }
         if (method === 'POST') {
@@ -131,9 +199,45 @@ async function handleApi(req, res, pathname) {
         }
     }
 
+    if (pathname.startsWith('/api/spells/')) {
+        const id = pathname.split('/')[3];
+        if (!id) return sendError(res, 'ID заклинания не указан', 400);
+        if (method === 'GET') {
+            const spell = await Spell.findByPk(id);
+            if (!spell) return sendError(res, 'Заклинание не найдено', 404);
+            return sendJson(res, spell.toJSON());
+        }
+        if (method === 'PUT') {
+            const body = await parseBody(req);
+            if (!body) return sendError(res, 'Тело запроса обязательно', 400);
+            const [updated] = await Spell.update({
+                name: body.name,
+                description: body.description,
+                level: body.level || 0,
+                school: body.school || '',
+                jsonData: JSON.stringify(normalizeObjectData(body.jsonData || {}))
+            }, { where: { id } });
+            if (updated === 0) return sendError(res, 'Заклинание не найдено', 404);
+            const spell = await Spell.findByPk(id);
+            return sendJson(res, spell.toJSON());
+        }
+        if (method === 'DELETE') {
+            const deleted = await Spell.destroy({ where: { id } });
+            return sendJson(res, { deleted: deleted > 0 });
+        }
+    }
+
     if (pathname === '/api/races') {
         if (method === 'GET') {
-            const rows = await Race.findAll({ order: [['name', 'ASC']] });
+            const query = url.parse(req.url, true).query;
+            let where = {};
+            if (query.name) {
+                where.name = { [Op.like]: `%${query.name}%` };
+            }
+            if (query.id) {
+                where.id = query.id;
+            }
+            const rows = await Race.findAll({ where, order: [['name', 'ASC']] });
             return sendJson(res, rows.map(row => row.toJSON()));
         }
         if (method === 'POST') {
@@ -151,9 +255,44 @@ async function handleApi(req, res, pathname) {
         }
     }
 
+    if (pathname.startsWith('/api/races/')) {
+        const id = pathname.split('/')[3];
+        if (!id) return sendError(res, 'ID расы не указан', 400);
+        if (method === 'GET') {
+            const race = await Race.findByPk(id);
+            if (!race) return sendError(res, 'Раса не найдена', 404);
+            return sendJson(res, race.toJSON());
+        }
+        if (method === 'PUT') {
+            const body = await parseBody(req);
+            if (!body) return sendError(res, 'Тело запроса обязательно', 400);
+            const [updated] = await Race.update({
+                name: body.name,
+                description: body.description,
+                traits: JSON.stringify(body.traits || []),
+                jsonData: JSON.stringify(normalizeObjectData(body.jsonData || {}))
+            }, { where: { id } });
+            if (updated === 0) return sendError(res, 'Раса не найдена', 404);
+            const race = await Race.findByPk(id);
+            return sendJson(res, race.toJSON());
+        }
+        if (method === 'DELETE') {
+            const deleted = await Race.destroy({ where: { id } });
+            return sendJson(res, { deleted: deleted > 0 });
+        }
+    }
+
     if (pathname === '/api/classes') {
         if (method === 'GET') {
-            const rows = await ClassModel.findAll({ order: [['name', 'ASC']] });
+            const query = url.parse(req.url, true).query;
+            let where = {};
+            if (query.name) {
+                where.name = { [Op.like]: `%${query.name}%` };
+            }
+            if (query.id) {
+                where.id = query.id;
+            }
+            const rows = await ClassModel.findAll({ where, order: [['name', 'ASC']] });
             return sendJson(res, rows.map(row => row.toJSON()));
         }
         if (method === 'POST') {
@@ -171,6 +310,33 @@ async function handleApi(req, res, pathname) {
         }
     }
 
+    if (pathname.startsWith('/api/classes/')) {
+        const id = pathname.split('/')[3];
+        if (!id) return sendError(res, 'ID класса не указан', 400);
+        if (method === 'GET') {
+            const cls = await ClassModel.findByPk(id);
+            if (!cls) return sendError(res, 'Класс не найден', 404);
+            return sendJson(res, cls.toJSON());
+        }
+        if (method === 'PUT') {
+            const body = await parseBody(req);
+            if (!body) return sendError(res, 'Тело запроса обязательно', 400);
+            const [updated] = await ClassModel.update({
+                name: body.name,
+                description: body.description,
+                hitDice: body.hitDice || '',
+                jsonData: JSON.stringify(normalizeObjectData(body.jsonData || {}))
+            }, { where: { id } });
+            if (updated === 0) return sendError(res, 'Класс не найден', 404);
+            const cls = await ClassModel.findByPk(id);
+            return sendJson(res, cls.toJSON());
+        }
+        if (method === 'DELETE') {
+            const deleted = await ClassModel.destroy({ where: { id } });
+            return sendJson(res, { deleted: deleted > 0 });
+        }
+    }
+
     return sendError(res, 'API route not found', 404);
 }
 
@@ -178,6 +344,9 @@ async function startServer() {
     try {
         await sequelize.authenticate();
         await sequelize.sync();
+        await seedRacesIfEmpty();
+        await seedClassesIfEmpty();
+        await seedSpellsIfEmpty();
         const server = http.createServer(async (req, res) => {
             const parsed = url.parse(req.url || '', true);
             const pathname = parsed.pathname || '/';
