@@ -1,34 +1,34 @@
 // ===== Расовые черты и интерфейс выбора =====
 
-function parseRaceTrait(traitString) {
+function parseRaceTrait(traitString, raceName) {
     const [, description] = traitString.split(/:\s*(.+)/);
     const name = traitString.split(':')[0].trim();
     const desc = description ? description.trim() : '';
-    const id = name.toLowerCase().replace(/[^a-zа-я0-9]+/gi, '-').replace(/^-+|-+$/g, '');
+    const idSource = raceName ? raceName + '|' + name : name;
+    const id = idSource.toLowerCase().replace(/[^a-zа-я0-9]+/gi, '-').replace(/^-+|-+$/g, '');
     const summary = desc.length > 60 ? desc.slice(0, 60).replace(/\s+\S*$/, '') + '...' : desc;
-    return { id, name, description: desc, summary };
+    return { id, name, description: desc, summary, race: raceName || '' };
+}
+
+function getAllRaceTraits() {
+    return Object.entries(races).flatMap(([raceName, raceData]) => {
+        if (!raceData || !Array.isArray(raceData.traits)) {
+            return [];
+        }
+        return raceData.traits.map(traitString => parseRaceTrait(traitString, raceName));
+    });
 }
 
 function getRaceTraitOptions() {
-    const raceData = getRaceData(state.charRace);
-    if (!raceData || !Array.isArray(raceData.traits)) {
-        return [];
-    }
-
     const selected = new Set(state.selectedRaceTraits || []);
-    return raceData.traits
-        .map(parseRaceTrait)
-        .filter(trait => !selected.has(trait.id));
+    return getAllRaceTraits().map(trait => ({
+        ...trait,
+        selected: selected.has(trait.id)
+    }));
 }
 
 function getRaceTraitById(traitId) {
-    const raceData = getRaceData(state.charRace);
-    if (!raceData || !Array.isArray(raceData.traits)) {
-        return null;
-    }
-    return raceData.traits
-        .map(parseRaceTrait)
-        .find(trait => trait.id === traitId) || null;
+    return getAllRaceTraits().find(trait => trait.id === traitId) || null;
 }
 
 function renderRaceTraitSelect() {
@@ -48,14 +48,42 @@ function renderRaceTraitSelect() {
     options.forEach(trait => {
         const option = document.createElement('option');
         option.value = trait.id;
-        option.textContent = trait.name;
+        option.textContent = trait.name + ' (' + trait.race + ')' + (trait.selected ? ' (выбрано)' : '');
+        if (trait.selected) {
+            option.disabled = true;
+        }
         select.appendChild(option);
     });
 
     const addButton = document.getElementById('addRaceTraitBtn');
     if (addButton) {
-        addButton.disabled = options.length === 0;
+        addButton.disabled = options.every(trait => trait.selected);
     }
+}
+
+function renderRaceTraitList() {
+    const container = document.getElementById('raceTraitList');
+    if (!container) return;
+
+    const raceData = getRaceData(state.charRace);
+    container.innerHTML = '';
+
+    if (!raceData || !Array.isArray(raceData.traits) || raceData.traits.length === 0) {
+        container.innerHTML = '<p style="opacity:0.7; margin:0;">Черты для этой расы не заданы.</p>';
+        return;
+    }
+
+    const list = document.createElement('ul');
+    list.className = 'race-trait-full-list';
+
+    raceData.traits.forEach(traitString => {
+        const trait = parseRaceTrait(traitString);
+        const item = document.createElement('li');
+        item.innerHTML = `<strong>${trait.name}</strong>: ${trait.description}`;
+        list.appendChild(item);
+    });
+
+    container.appendChild(list);
 }
 
 function renderRaceTraitsTable() {
@@ -124,6 +152,7 @@ function updateRaceTraitUI() {
         return;
     }
     renderRaceTraitSelect();
+    renderRaceTraitList();
     renderRaceTraitsTable();
 }
 
