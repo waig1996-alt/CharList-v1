@@ -171,10 +171,11 @@ function renderSpells() {
             if (spell.action === 'reaction') actionIcon = '🔄';
             if (spell.action === 'ritual') actionIcon = '🔮';
             
+            let langBadge = spell.sourceLang ? '<span class="spell-lang-badge">' + spell.sourceLang.toUpperCase() + '</span>' : '';
             let spellIdx = state.spells.indexOf(spell);
             li.innerHTML = 
                 '<div class="spell-card-header">' +
-                '<strong>' + spell.name + '</strong>' +
+                '<strong>' + spell.name + '</strong>' + langBadge +
                 '<span class="spell-action">' + actionIcon + ' ' + spell.action + '</span>' +
                 '</div>' +
                 '<div class="spell-card-meta">' +
@@ -480,23 +481,41 @@ function addPinnedSpell() {
 /**
  * Загрузить заклинания из БД
  */
+function getLocalizedSpellData(rawSpell, lang = 'ru') {
+    let jsonData = {};
+    try {
+        jsonData = typeof rawSpell.jsonData === 'string' ? JSON.parse(rawSpell.jsonData) : rawSpell.jsonData || {};
+    } catch (e) {
+        console.warn('Ошибка парсинга jsonData для заклинания:', rawSpell.name, e);
+    }
+
+    const localized = (jsonData[lang] && typeof jsonData[lang] === 'object') ? jsonData[lang] : {};
+    const fallback = jsonData[lang === 'ru' ? 'en' : 'ru'] || {};
+
+    const name = localized.name || fallback.name || rawSpell.name || '';
+    const description = localized.text || localized.description || fallback.text || fallback.description || rawSpell.description || '';
+    const level = Number(localized.level ?? rawSpell.level ?? fallback.level) || 0;
+    const castTime = localized.castingTime || localized.duration || rawSpell.castTime || '1 действие';
+    const action = localized.action || rawSpell.action || 'action';
+    const attr = localized.spellAttribute || rawSpell.attr || 'wis';
+    const damage = localized.damage || rawSpell.damage || null;
+
+    return {
+        name,
+        level,
+        action,
+        castTime,
+        attr,
+        damage,
+        description
+    };
+}
+
 async function loadSpellsFromDatabase() {
     try {
         const response = await fetch('/api/spells');
         if (!response.ok) throw new Error('Ошибка загрузки');
-        const spells = await response.json();
-        
-        // Преобразовать данные БД в формат приложения
-        return spells.map(s => ({
-            name: s.spellName,
-            level: s.spellLevel,
-            action: s.action || 'action',
-            castTime: s.castTime || '1 действие',
-            attr: s.spellAttribute || 'wis',
-            proficient: false,
-            damage: s.damageInfo || null,
-            description: s.description || s.shortDesc || ''
-        }));
+        return await response.json();
     } catch (error) {
         console.error('Ошибка загрузки заклинаний:', error);
         addToLog('❌ Ошибка загрузки заклинаний из БД');
@@ -515,33 +534,115 @@ async function showSpellSelectionModal() {
         return;
     }
 
-    let html = '<div class="custom-prompt-overlay"><div class="custom-prompt" style="max-width: 600px;">' +
-        '<h3>✨ Выберите заклинание</h3>' +
-        '<div style="max-height: 400px; overflow-y: auto;">';
-    
-    dbSpells.forEach((spell, idx) => {
-        html += '<div style="padding: 10px; border: 1px solid #ccc; margin: 5px 0; cursor: pointer;" onclick="selectSpellFromDb(' + idx + ', ' + JSON.stringify(spell).replace(/"/g, '&quot;') + ')">' +
-            '<strong>' + spell.name + '</strong> (' + (spell.level === 0 ? 'Заговор' : 'ЯЗ ' + spell.level) + ')' +
-            '<br><small>' + spell.description + '</small>' +
-            '</div>';
-    });
-    
-    html += '</div><button onclick="this.closest(\'.custom-prompt-overlay\').remove();">Отмена</button></div></div>';
-    
+    let selectedLanguage = 'ru';
+
     const overlay = document.createElement('div');
-    overlay.innerHTML = html;
+    overlay.className = 'custom-prompt-overlay';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.zIndex = '10000';
+    
+    const modal = document.createElement('div');
+    modal.className = 'custom-prompt';
+    modal.style.maxWidth = '700px';
+    modal.style.maxHeight = '600px';
+    modal.style.display = 'flex';
+    modal.style.flexDirection = 'column';
+
+    let html = '<h3 style="margin-top: 0;">📚 Выберите заклинание из БД</h3>';
+    html += '<div style="margin: 10px 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
+    html += '<label for="spellLanguageSelect" style="font-weight: 600; white-space: nowrap;">Язык:</label>';
+    html += '<select id="spellLanguageSelect" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-width: 140px;">';
+    html += '<option value="ru">Русский</option>';
+    html += '<option value="en">English</option>';
+    html += '</select>';
+    html += '<input type="text" id="spellSearchBox" placeholder="🔍 Поиск..." style="flex: 1; min-width: 220px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">';
+    html += '</div>';
+    html += '<div id="spellsListContainer" style="flex: 1; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin: 10px 0; background: #fafafa;">';
+    html += '</div>';
+    html += '<div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px;">';
+    html += '<button id="cancelDbSpellBtn" style="padding: 8px 16px; background: #ccc; border: none; border-radius: 4px; cursor: pointer;">❌ Отмена</button>';
+    html += '</div>';
+
+    modal.innerHTML = html;
+    overlay.appendChild(modal);
     document.body.appendChild(overlay);
+
+    const searchBox = modal.querySelector('#spellSearchBox');
+    const langSelect = modal.querySelector('#spellLanguageSelect');
+    const listContainer = modal.querySelector('#spellsListContainer');
+
+    function renderSpellList() {
+        const query = searchBox.value.toLowerCase();
+        let htmlList = '';
+
+        dbSpells.forEach((spell, idx) => {
+            const display = getLocalizedSpellData(spell, selectedLanguage);
+            const text = `${display.name} ${display.description} ${display.castTime} ${display.level}`.toLowerCase();
+            if (query && !text.includes(query)) return;
+
+            const levelName = display.level === 0 ? 'Заговор' : `ЯЗ ${display.level}`;
+            const actionIcon = display.action === 'bonus-action' ? '⚡' : 
+                               display.action === 'reaction' ? '🔄' : 
+                               display.action === 'ritual' ? '🔮' : '⏱️';
+
+            htmlList += `<div class="spell-db-item" data-idx="${idx}" style="padding: 10px; border: 1px solid #e0e0e0; margin: 5px 0; border-radius: 4px; cursor: pointer; background: white; transition: all 0.2s;" onmouseover="this.style.background='#f0f8ff'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.background='white'; this.style.boxShadow='none';">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                    <strong style="flex: 1; min-width: 0;">${display.name}</strong>
+                    <span style="background: #e8d4b8; padding: 3px 8px; border-radius: 12px; font-size: 0.85rem; white-space: nowrap; margin-left: 10px;">${actionIcon} ${levelName}</span>
+                </div>
+                <div style="font-size: 0.85rem; color: #666; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 6px;">
+                    <span>🕐 ${display.castTime}</span>
+                    <span>📊 ${display.attr.toUpperCase()}</span>
+                    ${display.damage ? `<span>💥 ${display.damage}</span>` : ''}
+                    <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">${selectedLanguage.toUpperCase()}</span>
+                </div>
+                ${display.description ? `<div style="font-size: 0.8rem; color: #999; margin-top: 4px; max-height: 40px; overflow: hidden;">${display.description}</div>` : ''}
+            </div>`;
+        });
+
+        listContainer.innerHTML = htmlList || '<div style="color:#666; padding:16px; text-align:center;">Нет заклинаний по фильтру</div>';
+
+        listContainer.querySelectorAll('.spell-db-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const idx = parseInt(item.dataset.idx);
+                const spell = dbSpells[idx];
+                selectSpellFromDb(spell, selectedLanguage);
+                overlay.remove();
+            });
+        });
+    }
+
+    searchBox.addEventListener('input', renderSpellList);
+    langSelect.addEventListener('change', (e) => {
+        selectedLanguage = e.target.value;
+        renderSpellList();
+    });
+
+    modal.querySelector('#cancelDbSpellBtn').addEventListener('click', () => {
+        overlay.remove();
+    });
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            overlay.remove();
+        }
+    });
+
+    renderSpellList();
+    searchBox.focus();
 }
 
 /**
  * Выбрать заклинание из БД
  */
-function selectSpellFromDb(idx, spell) {
-    state.spells.push(spell);
+function selectSpellFromDb(spell, lang = 'ru') {
+    const display = getLocalizedSpellData(spell, lang);
+    state.spells.push({ ...display, sourceLang: lang });
     renderSpells();
     autoSave();
-    document.querySelector('.custom-prompt-overlay')?.remove();
-    addToLog('✨ ' + spell.name + ' добавлено из БД!');
+    addToLog('✨ ' + display.name + ' добавлено из БД!');
 }
 
 /**
@@ -550,6 +651,7 @@ function selectSpellFromDb(idx, spell) {
 document.addEventListener('DOMContentLoaded', () => {
     // Кнопка для добавления заклинания
     document.getElementById('addSpellBtn')?.addEventListener('click', addSpell);
+    document.getElementById('addSpellFromDbBtn')?.addEventListener('click', showSpellSelectionModal);
     document.getElementById('restoreSlotsBtn')?.addEventListener('click', restoreAllSlots);
     document.getElementById('addSlotBtn')?.addEventListener('click', () => {
         let level = parseInt(document.getElementById('slotLevel')?.value) || 1;

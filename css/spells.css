@@ -71,6 +71,16 @@
     flex: 1;
 }
 
+.spell-lang-badge {
+    background: #dfeaf3;
+    color: #335a80;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
 .spell-action {
     background: #e8d4b8;
     padding: 3px 10px;
@@ -256,6 +266,23 @@ button.dice:active {
         border-color: #4a6a8a;
         color: #7a9abf;
     }
+}
+
+/* Элементы диалога выбора заклинания из БД */
+.spell-db-item {
+    transition: all 0.2s ease;
+    border-radius: 6px;
+}
+
+.spell-db-item:hover {
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    background: #f0f8ff !important;
+}
+
+.spell-db-item strong {
+    color: #2c3e50;
+    font-size: 0.95rem;
 }
 
 /* Адаптивный дизайн */

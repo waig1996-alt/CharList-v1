@@ -1,7 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const url = require('url');
+const { URL } = require('url');
 const { Sequelize, Op } = require('sequelize');
 const { sequelize, Character, Spell, Race, ClassModel } = require('./models/database');
 const { raceSeed, classSeed, spellSeed } = require('./models/seed-data');
@@ -166,7 +166,7 @@ async function handleApi(req, res, pathname) {
 
     if (pathname === '/api/spells') {
         if (method === 'GET') {
-            const query = url.parse(req.url, true).query;
+            const query = Object.fromEntries(new URL(req.url, 'http://localhost').searchParams.entries());
             let where = {};
             if (query.name) {
                 where.name = { [Op.like]: `%${query.name}%` };
@@ -229,7 +229,7 @@ async function handleApi(req, res, pathname) {
 
     if (pathname === '/api/races') {
         if (method === 'GET') {
-            const query = url.parse(req.url, true).query;
+            const query = Object.fromEntries(new URL(req.url, 'http://localhost').searchParams.entries());
             let where = {};
             if (query.name) {
                 where.name = { [Op.like]: `%${query.name}%` };
@@ -284,7 +284,7 @@ async function handleApi(req, res, pathname) {
 
     if (pathname === '/api/classes') {
         if (method === 'GET') {
-            const query = url.parse(req.url, true).query;
+            const query = Object.fromEntries(new URL(req.url, 'http://localhost').searchParams.entries());
             let where = {};
             if (query.name) {
                 where.name = { [Op.like]: `%${query.name}%` };
@@ -348,8 +348,8 @@ async function startServer() {
         await seedClassesIfEmpty();
         await seedSpellsIfEmpty();
         const server = http.createServer(async (req, res) => {
-            const parsed = url.parse(req.url || '', true);
-            const pathname = parsed.pathname || '/';
+const parsedUrl = new URL(req.url || '/', 'http://localhost');
+        const pathname = parsedUrl.pathname || '/';
 
             if (pathname.startsWith('/api/')) {
                 try {
