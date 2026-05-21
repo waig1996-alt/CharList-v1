@@ -299,6 +299,36 @@
 <button id="openDiceRoller" class="dice-roller-btn">🎲 Бросить кубик</button>
 <button id="openRollHistory" class="dice-roller-btn">📜 История</button>
 
+<!-- Action buttons panel (bottom center) -->
+<div id="actionPanel" class="action-panel" aria-hidden="false">
+    <div class="action-buttons">
+        <div class="action-col">
+            <button class="action-btn" data-type="action" title="Действие">
+                <div class="action-circle action-primary" aria-hidden="true">⚪</div>
+            </button>
+            <div class="action-label">Действие</div>
+        </div>
+        <div class="action-col">
+            <button class="action-btn" data-type="bonus" title="Бонусное действие">
+                <div class="action-circle action-bonus" aria-hidden="true">⚪</div>
+            </button>
+            <div class="action-label">Бонус</div>
+        </div>
+        <div class="action-col">
+            <button class="action-btn" data-type="reaction" title="Реакция">
+                <div class="action-circle action-reaction" aria-hidden="true">⚪</div>
+            </button>
+            <div class="action-label">Реакция</div>
+        </div>
+        <div class="action-col">
+            <button id="endTurnBtn" class="action-btn end-turn" title="Закончить круг">
+                <div class="action-circle action-end" aria-hidden="true">⟳</div>
+            </button>
+            <div class="action-label">Закончить</div>
+        </div>
+    </div>
+</div>
+
 <!-- ПАНЕЛЬ ВЫБОРА КУБИКОВ -->
 <div id="diceSelector" class="dice-panel dice-selector">
     <div class="dice-panel-title">Выберите кубики (нажмите на название)</div>
@@ -420,6 +450,9 @@
 
 <!-- 15. Обработчики событий (initEventHandlers — все кнопки) -->
 <script src="js/event-handlers.js"></script>
+
+<!-- Action panel behavior -->
+<script src="js/action-panel.js"></script>
 
 <!-- 16. Бросок кубиков (dice-roller — независимый модуль) -->
 <script src="js/dice-roller.js"></script>

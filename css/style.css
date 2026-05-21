@@ -770,3 +770,66 @@ body.dark .skill-name.proficient {
     from { opacity: 0; transform: translateX(-10px); }
     to { opacity: 1; transform: translateX(0); }
 }
+
+/* --- Action Panel (bottom center) --- */
+.action-panel {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 20px;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+}
+.action-buttons {
+    display: flex;
+    gap: 18px;
+    background: rgba(255,255,255,0.06);
+    padding: 10px 14px;
+    border-radius: 28px;
+    border: 1px solid rgba(0,0,0,0.15);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    align-items: center;
+}
+.action-col { text-align: center; display:flex; flex-direction:column; align-items:center; }
+.action-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+    background: transparent;
+}
+.action-btn:active { transform: translateY(2px); }
+.action-circle { width: 54px; height: 54px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color: white; }
+.action-primary { background: #6b46c1; }
+.action-bonus { background: #16a34a; }
+.action-reaction { background: #f97316; }
+.action-end { background: #374151; }
+.action-label { margin-top:6px; font-size:0.75rem; color: var(--text-secondary); }
+.action-btn.used { opacity: 0.5; pointer-events: none; }
+.action-btn .small-icon { font-size: 0.9rem; }
+
+/* Modal for listing actions */
+.action-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index: 2005; }
+.action-modal { background: var(--modal-bg); color: var(--modal-text); border-radius: 16px; padding: 14px; width: 420px; max-width: 94%; border: 1px solid var(--border-card); }
+.action-modal h3 { margin: 0 0 8px 0; }
+.action-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 60vh; overflow:auto; }
+.action-option { background: var(--stat-bg); padding: 8px 10px; border-radius: 10px; cursor: pointer; display:flex; gap:8px; align-items:center; }
+.action-option img.icon { width:28px; height:28px; border-radius:6px; object-fit:cover; }
+.action-option span.title { font-weight:700; color: var(--text-primary); }
+.action-option span.sub { font-size:0.8rem; color: var(--text-secondary); }
+.action-option:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+.action-badge { font-size:0.7rem; padding:2px 6px; border-radius:12px; background:#e2c089; color:#3b2513; margin-left:auto; }
+
+@media (max-width: 520px) {
+    .action-buttons { gap: 10px; padding: 8px; }
+    .action-btn { width: 52px; height: 52px; }
+    .action-circle { width: 44px; height: 44px; }
+}
