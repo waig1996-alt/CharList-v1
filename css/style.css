@@ -808,6 +808,7 @@ body.dark .skill-name.proficient {
 }
 .action-btn:active { transform: translateY(2px); }
 .action-circle { width: 54px; height: 54px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color: white; }
+.action-circle img { width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; }
 .action-primary { background: #6b46c1; }
 .action-bonus { background: #16a34a; }
 .action-reaction { background: #f97316; }

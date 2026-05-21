@@ -34,6 +34,8 @@
         const buttons = document.querySelectorAll('.action-btn[data-type]');
         buttons.forEach(btn => {
             const type = btn.dataset.type;
+            // set default icon for each button
+            setCircleIcon(btn, null, type);
             btn.addEventListener('click', (ev)=>{
                 ev.preventDefault();
                 if (!isButtonAvailable(type)) return;
@@ -50,9 +52,40 @@
         // restore visual state from state.actionPanel if present
         if (window.state && state.actionPanel) {
             Object.keys(state.actionPanel).forEach(t => {
-                if (state.actionPanel[t] && state.actionPanel[t].used) setButtonUsedVisual(t, state.actionPanel[t].label);
+                const s = state.actionPanel[t];
+                if (s && s.used) setButtonUsedVisual(t, s.label, s.key);
             });
         }
+    }
+
+    function getIconUrlFor(key, type){
+        const base = 'assets/action-icons/';
+        if (!key && type){
+            if (type === 'action') return base + 'attack.svg';
+            if (type === 'bonus') return base + 'bonus.svg';
+            if (type === 'reaction') return base + 'reaction.svg';
+        }
+        if (!key) return base + 'image_def.svg';
+        // normalize known prefixes
+        if (key.startsWith('attack')) return base + 'attack.svg';
+        if (key.startsWith('spell')) return base + 'spell.svg';
+        if (key.indexOf('bonus') >= 0) return base + 'bonus.svg';
+        if (key.indexOf('reaction') >= 0 || key.indexOf('opportunity') >= 0) return base + 'reaction.svg';
+        if (key === 'action_surge') return base + 'attack.svg';
+        // otherwise assume file named by key exists
+        return base + key + '.svg';
+    }
+
+    function setCircleIcon(btn, key, type){
+        const circle = btn.querySelector('.action-circle');
+        if (!circle) return;
+        // remove existing children
+        circle.innerHTML = '';
+        const img = document.createElement('img');
+        img.className = 'icon';
+        img.src = getIconUrlFor(key, type);
+        img.onerror = function(){ img.src = 'assets/action-icons/image_def.svg'; };
+        circle.appendChild(img);
     }
 
     function isButtonAvailable(type){
@@ -106,11 +139,12 @@
             if (type === 'action') list.unshift({ key: 'action_surge', title: 'Всплеск действий (Action Surge)', sub: 'использует ресурс воина', source: 'special' });
         }
 
-        // render options
+        // render options with icons
         list.forEach(opt => {
             const el = document.createElement('div');
             el.className = 'action-option';
-            el.innerHTML = `<div style="width:32px;height:32px;border-radius:6px;background:#fff2;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--text-primary);">${opt.source === 'spell' ? '✨' : opt.source === 'attack' ? '⚔' : '•'}</div>` +
+            const iconUrl = getIconUrlFor(opt.key || opt.source, opt.source === 'attack' ? 'action' : opt.source);
+            el.innerHTML = `<img src="${iconUrl}" class="icon" onerror="this.src='assets/action-icons/image_def.svg'" style="width:32px;height:32px;border-radius:6px;object-fit:cover;">` +
                            `<div style="display:flex;flex-direction:column;flex:1;"><span class="title">${opt.title}</span><span class="sub">${opt.sub||''}</span></div>`;
             el.addEventListener('click', ()=>{
                 handleActionSelected(type, opt);
@@ -141,12 +175,12 @@
                 // ensure button is not permanently marked used
                 enableButtonTemporarily('action');
                 if (typeof addToLog === 'function') addToLog('⚡ Всплеск действий использован — одно дополнительное действие.');
-                return setButtonUsed('action', 'Всплеск действий');
+                return setButtonUsed('action', 'Всплеск действий', 'action_surge');
             }
         }
 
         // if spell chosen, we won't auto-consume slots here; keep visual only
-        setButtonUsed(type, label);
+        setButtonUsed(type, label, opt.key);
         if (typeof addToLog === 'function') addToLog(`✅ ${label} (${type})`);
 
         // class-specific triggers: paladin extra attack
@@ -171,31 +205,25 @@
         btn.removeAttribute('data-used');
     }
 
-    function setButtonUsed(type, label){
+    function setButtonUsed(type, label, key){
         // mark state
         state.actionPanel = state.actionPanel || {};
-        state.actionPanel[type] = { used: true, label };
+        state.actionPanel[type] = { used: true, label, key: key || null };
         // visual
-        setButtonUsedVisual(type, label);
+        setButtonUsedVisual(type, label, key);
         // reduce temp extra if used to consume it
         if (state._tempExtra && state._tempExtra.type === type && state._tempExtra.remaining > 0){
             state._tempExtra.remaining = Math.max(0, state._tempExtra.remaining - 1);
             if (state._tempExtra.remaining === 0) delete state._tempExtra;
         }
     }
-
-    function setButtonUsedVisual(type, label){
+    function setButtonUsedVisual(type, label, key){
         const btn = document.querySelector(`.action-btn[data-type="${type}"]`);
         if (!btn) return;
         btn.classList.add('used');
         btn.setAttribute('data-used','1');
-        const circle = btn.querySelector('.action-circle');
-        if (circle) {
-            // show short label/emoji
-            let short = label;
-            if (label.length > 10) short = label.slice(0,10) + '…';
-            circle.innerText = short;
-        }
+        // set icon according to key or type
+        setCircleIcon(btn, key || null, type);
     }
 
     function resetActionPanel(){
@@ -206,9 +234,8 @@
             const type = btn.dataset.type;
             const circle = btn.querySelector('.action-circle');
             if (circle){
-                if (type === 'action') circle.innerText = '⚪';
-                else if (type === 'bonus') circle.innerText = '⚪';
-                else if (type === 'reaction') circle.innerText = '⚪';
+                // restore default icon per type
+                setCircleIcon(btn, null, type);
             }
         });
         // clear temp extras and state mapping
