@@ -602,10 +602,12 @@ async function showSpellSelectionModal() {
 
         const modal = document.createElement('div');
         modal.className = 'custom-prompt';
-        modal.style.maxWidth = '800px';
-        modal.style.maxHeight = '700px';
+        modal.style.width = '900px';
+        modal.style.maxWidth = 'calc(100vw - 40px)';
+        modal.style.height = '900px';
         modal.style.display = 'flex';
         modal.style.flexDirection = 'column';
+        modal.style.overflow = 'hidden';
 
         const uniqueClasses = [...new Set((await Promise.all(dbSpells.map(async s => {
             try {
@@ -616,47 +618,52 @@ async function showSpellSelectionModal() {
             }
         }))).flat())].sort();
 
-        const uniqueSchools = [...new Set(dbSpells.map(s => {
-            try {
-                const jsonData = typeof s.jsonData === 'string' ? JSON.parse(s.jsonData) : s.jsonData || {};
-                const localized = jsonData.en || jsonData.ru || {};
-                return localized.school || s.school || '';
-            } catch (e) {
-                return s.school || '';
-            }
-        }).filter(Boolean))].sort();
+        function getUniqueSchoolsByLanguage(lang) {
+            return [...new Set(dbSpells.map(s => {
+                try {
+                    const jsonData = typeof s.jsonData === 'string' ? JSON.parse(s.jsonData) : s.jsonData || {};
+                    const localized = jsonData[lang] || {};
+                    const fallback = jsonData[lang === 'ru' ? 'en' : 'ru'] || {};
+                    return localized.school || fallback.school || s.school || '';
+                } catch (e) {
+                    return s.school || '';
+                }
+            }).filter(Boolean))].sort();
+        }
+
+        let uniqueSchools = getUniqueSchoolsByLanguage(selectedLanguage);
 
         let html = '';
         html += '<div style="margin: 10px 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
         html += '<label for="spellLanguageSelect" style="font-weight: 600; white-space: nowrap;">Язык:</label>';
-        html += '<select id="spellLanguageSelect" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-width: 140px;">';
+        html += '<select id="spellLanguageSelect" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-width: 140px; width: auto; flex: 0 0 auto;">';
         html += '<option value="ru">Русский</option>';
         html += '<option value="en">English</option>';
         html += '</select>';
-        html += '<input type="text" id="spellSearchBox" placeholder="🔍 Поиск..." style="flex: 1; min-width: 220px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">';
+        html += '<input type="text" id="spellSearchBox" placeholder="🔍 Поиск..." style="flex: 1 1 260px; min-width: 220px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: auto;">';
         html += '</div>';
 
-        html += '<div style="margin: 10px 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">';
-        html += '<label style="font-weight: 600;">Фильтры:</label>';
-        html += '<select id="classFilter" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px;">';
+        html += '<div style="margin: 10px 0; display: flex; gap: 8px; align-items: center; flex-wrap: nowrap; overflow-x: auto; width: 100%;">';
+        html += '<label style="font-weight: 600; white-space: nowrap; flex: 0 0 auto;">Фильтры:</label>';
+        html += '<select id="classFilter" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px; min-width: 150px; flex: 0 0 auto; width: auto;">';
         html += '<option value="">Все классы</option>';
         uniqueClasses.forEach(cls => {
             html += `<option value="${cls}">${cls}</option>`;
         });
         html += '</select>';
-        html += '<select id="levelFilter" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px;">';
+        html += '<select id="levelFilter" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px; min-width: 150px; flex: 0 0 auto; width: auto;">';
         html += '<option value="">Все уровни</option>';
         for (let i = 0; i <= 9; i++) {
             html += `<option value="${i}">${i === 0 ? 'Заговоры' : 'Уровень ' + i}</option>`;
         }
         html += '</select>';
-        html += '<select id="schoolFilter" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px;">';
+        html += '<select id="schoolFilter" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px; min-width: 150px; flex: 0 0 auto; width: auto;">';
         html += '<option value="">Все школы</option>';
         uniqueSchools.forEach(school => {
             html += `<option value="${school}">${school}</option>`;
         });
         html += '</select>';
-        html += '<select id="actionFilter" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px;">';
+        html += '<select id="actionFilter" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px; min-width: 150px; flex: 0 0 auto; width: auto;">';
         html += '<option value="">Все типы</option>';
         html += '<option value="action">Действие</option>';
         html += '<option value="bonus-action">Бонусное действие</option>';
@@ -752,6 +759,9 @@ async function showSpellSelectionModal() {
         searchBox.addEventListener('input', renderSpellList);
         langSelect.addEventListener('change', (e) => {
             selectedLanguage = e.target.value;
+            const languageSchools = getUniqueSchoolsByLanguage(selectedLanguage);
+            schoolFilter.innerHTML = '<option value="">Все школы</option>' + languageSchools.map(school => `<option value="${school}">${school}</option>`).join('');
+            filters.school = '';
             renderSpellList();
         });
         classFilter.addEventListener('change', (e) => {

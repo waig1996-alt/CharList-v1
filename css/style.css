@@ -368,7 +368,8 @@ footer {
     border-radius: 24px;
     padding: 20px;
     min-width: 300px;
-    max-width: 400px;
+    max-width: 920px;
+    width: auto;
     border: 1px solid var(--border-card);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
