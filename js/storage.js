@@ -14,14 +14,14 @@ function autoSave() {
     // 1. Всегда сохраняем в localStorage (мгновенно)
     localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(CharacterModel.toJSON()));
 
-    // 2. Серверное сохранение — debounced (раз в 10 секунд)
+    // 2. Серверное сохранение — debounced (раз в 3 секунды)
     if (AuthService.isLoggedIn() && !_serverSavePending) {
         _serverSavePending = true;
         clearTimeout(_serverSaveTimer);
         _serverSaveTimer = setTimeout(function () {
             _serverSavePending = false;
             saveToServer();
-        }, 10000);
+        }, 3000);
     }
 }
 
