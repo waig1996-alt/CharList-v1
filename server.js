@@ -87,6 +87,13 @@ function normalizeObjectData(obj) {
     return obj;
 }
 
+/** Нормализовать sheetData: если уже строка — оставить как есть, иначе — JSON.stringify */
+function normalizeSheetData(data) {
+    if (!data) return '{}';
+    if (typeof data === 'string') return data;        // уже JSON-строка от клиента
+    return JSON.stringify(normalizeObjectData(data)); // объект → строка (старый формат)
+}
+
 async function seedRacesIfEmpty() {
     const count = await Race.count();
     if (count > 0) {
@@ -225,7 +232,7 @@ async function handleApi(req, res, pathname) {
                 }
             }
 
-            const sheetData = JSON.stringify(normalizeObjectData(body.sheetData));
+            const sheetData = normalizeSheetData(body.sheetData);
             const charData = {
                 id: body.id || undefined,
                 name: body.name,
