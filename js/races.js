@@ -314,21 +314,19 @@ function applyRaceBoosts(raceName) {
     const previousBonuses = state.appliedRaceBoosts || {};
 
     // Откатить старые бонусы если была другая раса
-    Object.entries(previousBonuses).forEach(([ability, bonus]) => {
-        const statElement = document.getElementById(ability);
-        if (statElement) {
-            const currentValue = parseInt(statElement.value) || 10;
-            statElement.value = Math.max(3, currentValue - bonus);
-        }
+    Object.keys(previousBonuses).forEach(function (ability) {
+        var bonus = previousBonuses[ability];
+        state.stats[ability] = Math.max(3, (state.stats[ability] || 10) - bonus);
+        var statElement = document.getElementById(ability);
+        if (statElement) statElement.value = state.stats[ability];
     });
 
     // Применить новые бонусы
-    Object.entries(boosts).forEach(([ability, bonus]) => {
-        const statElement = document.getElementById(ability);
-        if (statElement) {
-            const currentValue = parseInt(statElement.value) || 10;
-            statElement.value = currentValue + bonus;
-        }
+    Object.keys(boosts).forEach(function (ability) {
+        var bonus = boosts[ability];
+        state.stats[ability] = (state.stats[ability] || 10) + bonus;
+        var statElement = document.getElementById(ability);
+        if (statElement) statElement.value = state.stats[ability];
     });
 
     // Сохранить применённые бонусы
@@ -336,7 +334,7 @@ function applyRaceBoosts(raceName) {
     
     // Обновить UI
     updateUI();
-    addToLog(`⭐ Применены расовые бонусы: ${raceName}`);
+    addToLog('⭐ Применены расовые бонусы: ' + raceName);
 }
 
 /**
@@ -345,12 +343,11 @@ function applyRaceBoosts(raceName) {
 function revertRaceBoosts() {
     if (!state.appliedRaceBoosts) return;
 
-    Object.entries(state.appliedRaceBoosts).forEach(([ability, bonus]) => {
-        const statElement = document.getElementById(ability);
-        if (statElement) {
-            const currentValue = parseInt(statElement.value) || 10;
-            statElement.value = Math.max(3, currentValue - bonus);
-        }
+    Object.keys(state.appliedRaceBoosts).forEach(function (ability) {
+        var bonus = state.appliedRaceBoosts[ability];
+        state.stats[ability] = Math.max(3, (state.stats[ability] || 10) - bonus);
+        var statElement = document.getElementById(ability);
+        if (statElement) statElement.value = state.stats[ability];
     });
 
     state.appliedRaceBoosts = null;

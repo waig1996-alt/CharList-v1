@@ -27,8 +27,16 @@ async function initNewCharacter() {
     let hitDice = getHitDiceByClass(selectedClass);
     state.multClasses = [{ className: selectedClass, level: 1, hitDice: hitDice }];
 
+    // Применить стандартные характеристики для класса (Standard Array 15-8)
+    var classStats = classDefaultStats[selectedClass] || classDefaultStats.fighter;
+    allStats.forEach(function (attr) {
+        var value = classStats[attr] || 10;
+        state.stats[attr] = value;
+        var el = document.getElementById(attr);
+        if (el) el.value = value;
+    });
+
     // Сброс всех классовых ресурсов к начальным значениям
-    // (значения берутся из ClassResourceRegistry — единственный источник истины)
     resetAllClassResources();
 
     state.manualHpEnabled = true;
