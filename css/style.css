@@ -10,12 +10,12 @@
     --bg-sheet: #13131a;
     --bg-card: rgba(20, 20, 30, 0.85);
     --border-card: rgba(255, 255, 255, 0.06);
-    --text-primary: #e8e6f0;
-    --text-secondary: #8b8a9a;
+    --text-primary: #f0edf7;
+    --text-secondary: #9b98ac;
     --stat-bg: rgba(25, 25, 38, 0.9);
     --stat-border: rgba(124, 58, 237, 0.4);
-    --input-bg: rgba(18, 18, 28, 0.95);
-    --input-border: rgba(255, 255, 255, 0.1);
+    --input-bg: rgba(30, 30, 44, 0.95);
+    --input-border: rgba(255, 255, 255, 0.12);
     --button-bg: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
     --button-text: #ffffff;
     --skill-bonus-bg: rgba(124, 58, 237, 0.15);
@@ -23,10 +23,10 @@
     --death-save-text: #c4b5fd;
     --log-bg: rgba(10, 10, 18, 0.95);
     --log-text: #a5a3b8;
-    --modal-bg: #18181f;
-    --modal-text: #e8e6f0;
-    --prompt-bg: #18181f;
-    --prompt-text: #e8e6f0;
+    --modal-bg: #1a1a24;
+    --modal-text: #ffffff;
+    --prompt-bg: #1a1a24;
+    --prompt-text: #ffffff;
     --class-row-bg: rgba(25, 25, 38, 0.8);
     --slot-row-bg: rgba(25, 25, 38, 0.6);
     --accent: #7c3aed;
@@ -953,6 +953,23 @@ footer {
 
 .spell-db-item {
     border: 1px solid var(--border-card) !important;
+    background: var(--stat-bg) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Override old inline white backgrounds in spell modal */
+#spellsListContainer {
+    background: var(--stat-bg) !important;
+    border-color: var(--border-card) !important;
+}
+
+/* Spell description modal — override inline light backgrounds */
+#spellDescModal .modal-content {
+    background: var(--modal-bg) !important;
+    color: var(--modal-text) !important;
+}
+
+#spellDescDetails {
     background: var(--stat-bg) !important;
 }
 
