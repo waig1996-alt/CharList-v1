@@ -47,6 +47,7 @@ const CharacterModel = {
         { key: 'charRace',      defaultVal: '',  domId: 'charRace' },
 
         // --- Специальные ---
+        { key: 'serverCharacterId', defaultVal: null },
         { key: 'hpHistory',       defaultVal: [] },
         { key: 'manualHpEnabled', defaultVal: false },
     ],

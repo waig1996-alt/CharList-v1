@@ -1,12 +1,14 @@
 // ============ ТОЧКА ВХОДА - ЗАПУСК ПРИЛОЖЕНИЯ ============
 // Зависит от: ВСЕХ модулей (подключены в index.html перед этим файлом)
 //
-// ПОСЛЕ РЕФАКТОРИНГА: рендеринг делегирован в CharacterSheetView.
-// app.js занимается только: версией, темой, диалогом, маршрутизацией.
+// ПОСЛЕ РЕФАКТОРИНГА (Stage 9):
+//   1. Рендеринг → CharacterSheetView
+//   2. Авторизация → AuthUI + AuthService
+//   3. Сохранение → localStorage (быстро) + сервер (надёжно)
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Версия
-    const versionSpan = document.getElementById('appVersion');
+    var versionSpan = document.getElementById('appVersion');
     if (versionSpan) versionSpan.textContent = APP_VERSION;
 
     // Миграция
@@ -24,15 +26,85 @@ document.addEventListener('DOMContentLoaded', async () => {
     CharacterSheetView.bindEvents();
 
     // Тема
-    const savedTheme = localStorage.getItem('dnd_theme');
+    var savedTheme = localStorage.getItem('dnd_theme');
     if (savedTheme === 'dark') {
         document.body.classList.add('dark');
-        const themeToggle = document.getElementById('themeToggle');
+        var themeToggle = document.getElementById('themeToggle');
         if (themeToggle) themeToggle.innerHTML = '☀️ Светлая тема';
     }
 
-    // Проверка наличия сохранения
-    const saved = localStorage.getItem(STORAGE_DATA_KEY);
+    // ========== АВТОРИЗАЦИЯ ==========
+
+    // Пробуем восстановить сессию
+    var hasSession = AuthService.loadSession();
+
+    if (hasSession) {
+        // Сессия есть — сразу к персонажам
+        await handleServerFlow();
+    } else {
+        // Нет сессии — показываем модалку
+        var authChoice = await AuthUI.showAuthModal();
+
+        if (authChoice === 'server') {
+            await handleServerFlow();
+        } else {
+            // Локальный режим (localStorage)
+            handleLocalFlow();
+        }
+    }
+
+    addToLog("🌸 Лист персонажа загружен.");
+});
+
+// ========== СЕРВЕРНЫЙ ПОТОК (авторизованный пользователь) ==========
+
+async function handleServerFlow() {
+    var characters;
+    try {
+        characters = await AuthService.getMyCharacters();
+    } catch (e) {
+        addToLog('❌ Ошибка соединения с сервером: ' + e.message);
+        handleLocalFlow();
+        return;
+    }
+
+    while (true) {
+        var choice = await AuthUI.showCharacterSelectModal(characters);
+
+        if (choice.action === 'logout') {
+            // Показать модалку авторизации заново
+            var authChoice = await AuthUI.showAuthModal();
+            if (authChoice === 'server') {
+                characters = await AuthService.getMyCharacters();
+                continue;
+            } else {
+                handleLocalFlow();
+                return;
+            }
+        }
+
+        if (choice.action === 'create') {
+            await initNewCharacter();
+            // Автосохранение на сервер после создания
+            await saveToServer();
+            return;
+        }
+
+        if (choice.action === 'load') {
+            var loaded = await loadFromServer(choice.characterId);
+            if (loaded) {
+                return;
+            }
+            // Ошибка загрузки — обновить список и показать заново
+            characters = await AuthService.getMyCharacters();
+        }
+    }
+}
+
+// ========== ЛОКАЛЬНЫЙ ПОТОК (localStorage, без сервера) ==========
+
+function handleLocalFlow() {
+    var saved = localStorage.getItem(STORAGE_DATA_KEY);
     var savedData = null;
     var hasSavedData = false;
 
@@ -41,7 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             savedData = JSON.parse(saved);
             hasSavedData = savedData.charName ||
                            (savedData.primaryClass !== 'fighter') ||
-                           (savedData.multClasses[0]?.level > 1);
+                           (savedData.multClasses && savedData.multClasses[0] && savedData.multClasses[0].level > 1);
         } catch(e) {}
     }
 
@@ -50,7 +122,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (hasSavedData) {
         action = prompt(
-            '🔄 Найдено сохранение персонажа "' + (savedData.charName || 'Безымянный') + '" (' + (classNames[savedData.primaryClass] || savedData.primaryClass) + ', уровень ' + (savedData.multClasses[0]?.level || 1) + ').' +
+            '🔄 Найдено сохранение персонажа "' + (savedData.charName || 'Безымянный') + '" (' +
+            (classNames[savedData.primaryClass] || savedData.primaryClass) + ', уровень ' +
+            (savedData.multClasses && savedData.multClasses[0] ? savedData.multClasses[0].level : 1) + ').' +
             '\n\nВведите номер действия:\n' +
             '1 - Загрузить сохранение\n' +
             '2 - Создать нового персонажа\n' +
@@ -59,43 +133,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         needImport = (action === '3');
     } else {
         action = prompt(
-            '🎭 Добро пожаловать в D&D 5e Character Sheet!\n\n' +
-            'Введите номер действия:\n' +
+            '🎭 Добро пожаловать в D&D 5e Character Sheet!\n\nВведите номер действия:\n' +
             '1 - Создать нового персонажа\n' +
             '2 - Импортировать персонажа из JSON файла'
         );
         needImport = (action === '2');
     }
 
-    // Если выбран импорт — сразу открываем диалог выбора файла
     if (needImport) {
         if (typeof triggerFileImport === 'function') {
             setTimeout(function () { triggerFileImport(); }, 100);
         } else {
-            addToLog('📀 Нажмите кнопку "📂 Загрузить" в блоке Журнал для импорта персонажа из JSON файла');
+            addToLog('📀 Нажмите "📂 Загрузить" в Журнале для импорта персонажа');
             alert('Для импорта персонажа нажмите кнопку "📂 Загрузить" в блоке "Журнал"');
         }
         return;
     }
 
-    // Обработка остальных вариантов
     if (hasSavedData && action === '1') {
         loadData();
-    }
-    else if ((hasSavedData && action === '2') || (!hasSavedData && action === '1')) {
+    } else if ((hasSavedData && action === '2') || (!hasSavedData && action === '1')) {
         if (hasSavedData) {
             localStorage.removeItem(STORAGE_DATA_KEY);
             localStorage.removeItem('dnd_roll_history');
         }
-        await initNewCharacter();
-    }
-    else {
+        // initNewCharacter is async but we're in a sync function — fire and forget
+        initNewCharacter();
+    } else {
         if (!hasSavedData) {
-            await initNewCharacter();
+            initNewCharacter();
         } else {
             loadData();
         }
     }
-
-    addToLog("🌸 Лист персонажа загружен.");
-});
+}

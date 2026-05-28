@@ -27,6 +27,7 @@ const state = {
     charRace: "",
     appliedRaceBoosts: null,
     selectedRaceTraits: [],
+    serverCharacterId: null,  // ID персонажа на сервере (null = только локально)
     stats: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
     money: { pp: 0, gp: 0, sp: 0, cp: 0 },
     rollHistory: [],

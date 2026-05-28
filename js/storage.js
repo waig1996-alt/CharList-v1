@@ -115,3 +115,56 @@ function resetAll() {
         location.reload();
     }
 }
+
+// ========== СЕРВЕРНОЕ СОХРАНЕНИЕ / ЗАГРУЗКА ==========
+
+/**
+ * Сохранить текущего персонажа на сервер.
+ * Требует активной сессии AuthService.
+ * @returns {Promise<Object>} — ответ сервера
+ */
+async function saveToServer() {
+    if (!AuthService.isLoggedIn()) return null;
+
+    try {
+        var sheetData = CharacterModel.toJSON();
+        var result = await AuthService.saveCharacter({
+            name: state.charName || 'Безымянный',
+            sheetData: JSON.stringify(sheetData),
+            characterId: state.serverCharacterId
+        });
+
+        // Сохраняем ID персонажа на сервере
+        if (result && result.id) {
+            state.serverCharacterId = result.id;
+        }
+
+        addToLog('☁️ Сохранено на сервер');
+        return result;
+    } catch (e) {
+        addToLog('❌ Ошибка сохранения на сервер: ' + e.message);
+        return null;
+    }
+}
+
+/**
+ * Загрузить персонажа с сервера.
+ * @param {number} characterId
+ * @returns {Promise<boolean>}
+ */
+async function loadFromServer(characterId) {
+    try {
+        var sheetData = await AuthService.loadCharacter(characterId);
+        state.serverCharacterId = characterId;
+
+        // Загружаем данные в state + рендерим
+        CharacterModel.fromJSON(sheetData, { manualHpForced: true });
+        autoSave(); // синхронизируем с localStorage
+
+        addToLog('☁️ Загружено с сервера');
+        return true;
+    } catch (e) {
+        addToLog('❌ Ошибка загрузки с сервера: ' + e.message);
+        return false;
+    }
+}
