@@ -5,6 +5,11 @@ const { URL } = require('url');
 const { Sequelize, Op } = require('sequelize');
 const { sequelize, Character, Spell, Race, ClassModel } = require('./models/database');
 const { raceSeed, classSeed, spellSeed } = require('./models/seed-data');
+const {
+    localizeSpell, localizeSpells,
+    buildClassSpellMap, getFullClassMap,
+    getSpellClassesEn, getAllClasses
+} = require('./models/spell-utils');
 
 const PORT = process.env.PORT || 3000;
 const publicRoot = path.join(__dirname);
@@ -180,8 +185,24 @@ async function handleApi(req, res, pathname) {
             if (query.id) {
                 where.id = query.id;
             }
-            const rows = await Spell.findAll({ where, order: [['level', 'ASC'], ['name', 'ASC']] });
-            return sendJson(res, rows.map(row => row.toJSON()));
+
+            // Поиск по фильтрам БД (name, level, school, id)
+            let rows = await Spell.findAll({ where, order: [['level', 'ASC'], ['name', 'ASC']] });
+
+            // Пост-фильтрация по классу (если указан)
+            if (query.class) {
+                const targetClass = query.class;
+                rows = rows.filter(function (spell) {
+                    var classes = getSpellClassesEn(spell.name);
+                    return classes.indexOf(targetClass) !== -1;
+                });
+            }
+
+            // Локализация (если указан язык)
+            const lang = query.lang || 'ru';
+            const localized = localizeSpells(rows, lang);
+
+            return sendJson(res, localized);
         }
         if (method === 'POST') {
             const body = await parseBody(req);
@@ -196,6 +217,20 @@ async function handleApi(req, res, pathname) {
                 jsonData: JSON.stringify(normalizeObjectData(body.jsonData || {}))
             });
             return sendJson(res, spell.toJSON(), 201);
+        }
+    }
+
+    // Маппинг «заклинание → классы» (замена eval() на клиенте!)
+    if (pathname === '/api/spells/class-map') {
+        if (method === 'GET') {
+            return sendJson(res, getFullClassMap());
+        }
+    }
+
+    // Список всех классов из маппинга
+    if (pathname === '/api/spells/classes') {
+        if (method === 'GET') {
+            return sendJson(res, getAllClasses());
         }
     }
 
@@ -347,6 +382,10 @@ async function startServer() {
         await seedRacesIfEmpty();
         await seedClassesIfEmpty();
         await seedSpellsIfEmpty();
+
+        // Построить маппинг «заклинание → классы» при старте
+        buildClassSpellMap();
+
         const server = http.createServer(async (req, res) => {
 const parsedUrl = new URL(req.url || '/', 'http://localhost');
         const pathname = parsedUrl.pathname || '/';
