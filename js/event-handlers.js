@@ -150,66 +150,6 @@ function initEventHandlers() {
         }
     });
 
-    // === Импорт JSON заклинаний ===
-    document.getElementById('importJsonBtn')?.addEventListener('click', () => {
-        let input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'application/json';
-        input.onchange = (e) => {
-            let file = e.target.files[0];
-            if (!file) return;
-            let reader = new FileReader();
-            reader.onload = (ev) => {
-                try {
-                    let data = JSON.parse(ev.target.result);
-                    let spellsToImport = Array.isArray(data) ? data : [data];
-                    let importedCount = 0;
-                    for (let spellData of spellsToImport) {
-                        if (spellData.name && spellData.level !== undefined) {
-                            let level = parseInt(spellData.level) || 0;
-                            if (level < 0) level = 0;
-                            if (level > 9) level = 9;
-                            let descParts = [];
-                            if (spellData.text) descParts.push(spellData.text);
-                            if (spellData.school) descParts.push('Школа: ' + spellData.school);
-                            if (spellData.castingTime) descParts.push('Время: ' + spellData.castingTime);
-                            if (spellData.range) descParts.push('Дистанция: ' + spellData.range);
-                            if (spellData.components) descParts.push('Компоненты: ' + spellData.components);
-                            if (spellData.materials && spellData.materials !== '-') descParts.push('Материалы: ' + spellData.materials);
-                            if (spellData.duration) descParts.push('Длительность: ' + spellData.duration);
-                            if (spellData.ritual === 'ритуал') descParts.push('Ритуал');
-                            if (spellData.source) descParts.push('Источник: ' + spellData.source);
-                            let fullDesc = descParts.join('\n');
-                            let exists = state.spells.some(s => s.name === spellData.name);
-                            if (!exists) {
-                                state.spells.push({
-                                    name: spellData.name,
-                                    level: level,
-                                    attr: document.getElementById('spellcastingAttr')?.value || 'wis',
-                                    proficient: true,
-                                    damage: '',
-                                    desc: fullDesc
-                                });
-                                importedCount++;
-                            }
-                        }
-                    }
-                    if (importedCount > 0) {
-                        renderSpells();
-                        addToLog('📖 Импортировано заклинаний: ' + importedCount);
-                    } else {
-                        addToLog('⚠️ Новых заклинаний не найдено');
-                    }
-                    autoSave();
-                } catch (err) {
-                    addToLog('❌ Ошибка парсинга JSON: ' + err.message);
-                }
-            };
-            reader.readAsText(file);
-        };
-        input.click();
-    });
-
     // === Хиты ===
     document.getElementById('hpHeal')?.addEventListener('click', healHp);
     document.getElementById('hpDamage')?.addEventListener('click', dealDamage);
@@ -242,8 +182,6 @@ function initEventHandlers() {
     });
 
     // === Сохранение / Загрузка ===
-    document.getElementById('saveToFileBtn')?.addEventListener('click', saveToFile);
-    document.getElementById('loadFromFileBtn')?.addEventListener('click', loadFromFile);
     document.getElementById('resetToDefaultBtn')?.addEventListener('click', resetAll);
 
     // === Сворачивание секций ===

@@ -117,53 +117,23 @@ function handleLocalFlow() {
         } catch(e) {}
     }
 
-    var action = '1';
-    var needImport = false;
-
     if (hasSavedData) {
-        action = prompt(
+        var action = prompt(
             '🔄 Найдено сохранение персонажа "' + (savedData.charName || 'Безымянный') + '" (' +
             (classNames[savedData.primaryClass] || savedData.primaryClass) + ', уровень ' +
             (savedData.multClasses && savedData.multClasses[0] ? savedData.multClasses[0].level : 1) + ').' +
             '\n\nВведите номер действия:\n' +
             '1 - Загрузить сохранение\n' +
-            '2 - Создать нового персонажа\n' +
-            '3 - Импортировать персонажа из JSON файла'
+            '2 - Создать нового персонажа'
         );
-        needImport = (action === '3');
-    } else {
-        action = prompt(
-            '🎭 Добро пожаловать в D&D 5e Character Sheet!\n\nВведите номер действия:\n' +
-            '1 - Создать нового персонажа\n' +
-            '2 - Импортировать персонажа из JSON файла'
-        );
-        needImport = (action === '2');
-    }
-
-    if (needImport) {
-        if (typeof triggerFileImport === 'function') {
-            setTimeout(function () { triggerFileImport(); }, 100);
+        if (action === '1') {
+            loadData();
         } else {
-            addToLog('📀 Нажмите "📂 Загрузить" в Журнале для импорта персонажа');
-            alert('Для импорта персонажа нажмите кнопку "📂 Загрузить" в блоке "Журнал"');
-        }
-        return;
-    }
-
-    if (hasSavedData && action === '1') {
-        loadData();
-    } else if ((hasSavedData && action === '2') || (!hasSavedData && action === '1')) {
-        if (hasSavedData) {
             localStorage.removeItem(STORAGE_DATA_KEY);
             localStorage.removeItem('dnd_roll_history');
-        }
-        // initNewCharacter is async but we're in a sync function — fire and forget
-        initNewCharacter();
-    } else {
-        if (!hasSavedData) {
             initNewCharacter();
-        } else {
-            loadData();
         }
+    } else {
+        initNewCharacter();
     }
 }

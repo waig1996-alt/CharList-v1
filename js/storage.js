@@ -1,14 +1,43 @@
-// ============ СОХРАНЕНИЕ / ЗАГРУЗКА / ИМПОРТ / ЭКСПОРТ ============
-// Зависит от: state.js, constants.js, ui-core.js, character-model.js
+// ============ СОХРАНЕНИЕ / ЗАГРУЗКА ============
+// Зависит от: state.js, character-model.js, auth-service.js
 //
-// ПОСЛЕ РЕФАКТОРИНГА: все знания о полях персонажа живут в CharacterModel.
-// Этот файл — ТОЛЬКО обвязка над localStorage и файловым вводом/выводом.
+// Два уровня сохранения:
+//   1. localStorage — быстро, офлайн, каждое изменение
+//   2. Сервер (через AuthService) — надёжно, debounced, при закрытии страницы
 
-// ========== АВТОСОХРАНЕНИЕ ==========
+// ========== АВТОСОХРАНЕНИЕ (localStorage + debounced server) ==========
+
+var _serverSaveTimer = null;
+var _serverSavePending = false;
 
 function autoSave() {
+    // 1. Всегда сохраняем в localStorage (мгновенно)
     localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(CharacterModel.toJSON()));
+
+    // 2. Серверное сохранение — debounced (раз в 10 секунд)
+    if (AuthService.isLoggedIn() && !_serverSavePending) {
+        _serverSavePending = true;
+        clearTimeout(_serverSaveTimer);
+        _serverSaveTimer = setTimeout(function () {
+            _serverSavePending = false;
+            saveToServer();
+        }, 10000);
+    }
 }
+
+/** Принудительно сохранить на сервер сейчас (сбрасывает таймер) */
+function flushServerSave() {
+    clearTimeout(_serverSaveTimer);
+    _serverSavePending = false;
+    if (AuthService.isLoggedIn()) {
+        saveToServer();
+    }
+}
+
+// Сохранение при закрытии страницы
+window.addEventListener('beforeunload', function () {
+    flushServerSave();
+});
 
 // ========== МИГРАЦИЯ ВЕРСИЙ ==========
 
@@ -18,12 +47,10 @@ function checkAndMigrateVersion() {
 
     if (!savedVersion) {
         localStorage.setItem(STORAGE_VERSION_KEY, currentVersion);
-        // addToLog здесь не вызываем — DOM может быть ещё не готов
         return;
     }
 
     if (savedVersion !== currentVersion) {
-        // Миграция будет вызвана после загрузки DOM
         if (typeof addToLog === 'function') {
             addToLog('📌 Обновление с версии ' + savedVersion + ' до ' + currentVersion);
         }
@@ -42,69 +69,11 @@ function loadData() {
 
     try {
         var data = JSON.parse(saved);
-        // manualHpForced = true: после загрузки из localStorage принудительно
-        // включаем ручное редактирование HP (историческое поведение)
         CharacterModel.fromJSON(data, { manualHpForced: true });
         addToLog('📀 Загружено сохранение');
     } catch (e) {
         console.error('Ошибка загрузки из localStorage:', e);
     }
-}
-
-// ========== СОХРАНЕНИЕ В JSON-ФАЙЛ ==========
-
-async function saveToFile() {
-    await CharacterModel.saveToFile();
-}
-
-// ========== ЗАГРУЗКА ИЗ JSON-ФАЙЛА ==========
-
-function loadFromFile() {
-    CharacterModel.loadFromFile();
-}
-
-// ========== ИМПОРТ ДАННЫХ ПЕРСОНАЖА (без очистки localStorage) ==========
-
-function importCharacterData(data) {
-    // Используется при загрузке из файла (loadFromFile уже делает fromJSON сам)
-    // и при сбросе. Оставлен для обратной совместимости.
-    CharacterModel.fromJSON(data, { manualHpForced: false, debugLog: true });
-    autoSave();
-}
-
-// ========== ТРИГГЕР ИМПОРТА (при старте приложения) ==========
-
-function triggerFileImport() {
-    var input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'application/json';
-
-    input.onchange = function (e) {
-        var file = e.target.files[0];
-        if (!file) return;
-
-        var reader = new FileReader();
-        reader.onload = function (ev) {
-            try {
-                var data = JSON.parse(ev.target.result);
-                // Очищаем старые данные перед импортом
-                localStorage.removeItem(STORAGE_DATA_KEY);
-                localStorage.removeItem('dnd_roll_history');
-
-                CharacterModel.fromJSON(data, { manualHpForced: false, debugLog: true });
-                autoSave();
-                addToLog('📀 Импортирован персонаж ' + (state.charName || 'Безымянный'));
-            } catch (err) {
-                addToLog('❌ Ошибка импорта: ' + err.message);
-            }
-        };
-        reader.readAsText(file);
-    };
-
-    // Авто-клик: открыть диалог выбора файла
-    document.body.appendChild(input);
-    input.click();
-    document.body.removeChild(input);
 }
 
 // ========== ПОЛНЫЙ СБРОС ==========
@@ -121,7 +90,6 @@ function resetAll() {
 /**
  * Сохранить текущего персонажа на сервер.
  * Требует активной сессии AuthService.
- * @returns {Promise<Object>} — ответ сервера
  */
 async function saveToServer() {
     if (!AuthService.isLoggedIn()) return null;
@@ -134,32 +102,26 @@ async function saveToServer() {
             characterId: state.serverCharacterId
         });
 
-        // Сохраняем ID персонажа на сервере
         if (result && result.id) {
             state.serverCharacterId = result.id;
         }
 
-        addToLog('☁️ Сохранено на сервер');
         return result;
     } catch (e) {
-        addToLog('❌ Ошибка сохранения на сервер: ' + e.message);
         return null;
     }
 }
 
 /**
  * Загрузить персонажа с сервера.
- * @param {number} characterId
- * @returns {Promise<boolean>}
  */
 async function loadFromServer(characterId) {
     try {
         var sheetData = await AuthService.loadCharacter(characterId);
         state.serverCharacterId = characterId;
 
-        // Загружаем данные в state + рендерим
         CharacterModel.fromJSON(sheetData, { manualHpForced: true });
-        autoSave(); // синхронизируем с localStorage
+        autoSave();
 
         addToLog('☁️ Загружено с сервера');
         return true;
