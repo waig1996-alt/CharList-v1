@@ -8,6 +8,8 @@
     "seed:all": "npm run seed:races && npm run seed:classes && npm run seed:spells"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.3",
     "sequelize": "^6.37.8",
     "sqlite3": "^6.0.1"
   }

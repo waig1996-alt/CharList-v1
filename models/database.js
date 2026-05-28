@@ -13,6 +13,23 @@ const sequelize = new Sequelize({
     logging: false
 });
 
+// ========== ПОЛЬЗОВАТЕЛЬ ==========
+
+class User extends Model {}
+User.init({
+    login: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+}, { sequelize, modelName: 'User' });
+
+// ========== ПЕРСОНАЖ ==========
+
 class Character extends Model {}
 Character.init({
     name: {
@@ -29,8 +46,17 @@ Character.init({
         type: DataTypes.TEXT,
         allowNull: false,
         defaultValue: '[]'
+    },
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,  // null = legacy (пока не привязан к пользователю)
+        references: { model: User, key: 'id' }
     }
 }, { sequelize, modelName: 'Character' });
+
+// Связи
+User.hasMany(Character, { foreignKey: 'userId', as: 'characters' });
+Character.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 class Spell extends Model {}
 Spell.init({
@@ -126,4 +152,4 @@ ClassSpell.init({
 Spell.hasMany(ClassSpell, { foreignKey: 'spellId', as: 'classLinks' });
 ClassSpell.belongsTo(Spell, { foreignKey: 'spellId', as: 'spell' });
 
-module.exports = { sequelize, Character, Spell, Race, ClassModel, ClassSpell };
+module.exports = { sequelize, User, Character, Spell, Race, ClassModel, ClassSpell };

@@ -3,8 +3,12 @@ const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
 const { Sequelize, Op } = require('sequelize');
-const { sequelize, Character, Spell, Race, ClassModel } = require('./models/database');
+const { sequelize, User, Character, Spell, Race, ClassModel } = require('./models/database');
 const { raceSeed, classSeed, spellSeed } = require('./models/seed-data');
+const {
+    register, login, getMe,
+    extractUser, authRequired, MAX_CHARACTERS_PER_USER
+} = require('./models/auth');
 const {
     localizeSpell, localizeSpells,
     buildClassSpellMap, getFullClassMap,
@@ -135,8 +139,66 @@ async function seedSpellsIfEmpty() {
     console.log(`Seeded ${records.length} spells into the database.`);
 }
 
+// ========== МИГРАЦИЯ (добавление колонки userId в существующую БД) ==========
+
+async function migrateAddUserId() {
+    try {
+        const [results] = await sequelize.query(
+            "PRAGMA table_info(Characters);"
+        );
+        const hasUserId = results.some(col => col.name === 'userId');
+        if (!hasUserId) {
+            await sequelize.query(
+                "ALTER TABLE Characters ADD COLUMN userId INTEGER REFERENCES Users(id) ON DELETE SET NULL;"
+            );
+            console.log('Migration: added userId column to Characters table.');
+        }
+    } catch (e) {
+        console.warn('Migration warning (userId column):', e.message);
+    }
+}
+
 async function handleApi(req, res, pathname) {
     const method = req.method;
+
+    // ========== АУТЕНТИФИКАЦИЯ ==========
+
+    if (pathname === '/api/auth/register' && method === 'POST') {
+        try {
+            const body = await parseBody(req);
+            const result = await register(body);
+            return sendJson(res, result.data || { error: result.error }, result.status);
+        } catch (e) {
+            console.error('Register error:', e);
+            return sendError(res, 'Ошибка регистрации: ' + e.message);
+        }
+    }
+
+    if (pathname === '/api/auth/login' && method === 'POST') {
+        try {
+            const body = await parseBody(req);
+            const result = await login(body);
+            return sendJson(res, result.data || { error: result.error }, result.status);
+        } catch (e) {
+            console.error('Login error:', e);
+            return sendError(res, 'Ошибка входа: ' + e.message);
+        }
+    }
+
+    if (pathname === '/api/auth/me' && method === 'GET') {
+        authRequired(req, res, async function (user) {
+            try {
+                const result = await getMe(user);
+                return sendJson(res, result.data || { error: result.error }, result.status);
+            } catch (e) {
+                console.error('Me error:', e);
+                return sendError(res, 'Ошибка: ' + e.message);
+            }
+        });
+        return;
+    }
+
+    // ========== СТАТУС ==========
 
     if (pathname === '/api/status') {
         return sendJson(res, { status: 'ok', database: 'sqlite', path: path.join('data', 'database.sqlite') });
@@ -153,10 +215,54 @@ async function handleApi(req, res, pathname) {
             if (!body || !body.name || !body.sheetData) {
                 return sendError(res, 'Тело запроса должно содержать name и sheetData', 400);
             }
+
+            // Если запрос с авторизацией — проверить лимит
+            const authUser = extractUser(req);
+            if (authUser && body.userId && body.userId === authUser.userId) {
+                const count = await Character.count({ where: { userId: authUser.userId } });
+                if (count >= MAX_CHARACTERS_PER_USER) {
+                    return sendError(res, 'Достигнут лимит: ' + MAX_CHARACTERS_PER_USER + ' персонажа на пользователя', 403);
+                }
+            }
+
             const sheetData = JSON.stringify(normalizeObjectData(body.sheetData));
-            const [character, created] = await Character.upsert({ id: body.id, name: body.name, sheetData, tags: JSON.stringify(body.tags || []) }, { returning: true });
+            const charData = {
+                id: body.id || undefined,
+                name: body.name,
+                sheetData,
+                tags: JSON.stringify(body.tags || [])
+            };
+            if (body.userId) charData.userId = body.userId;
+
+            const [character, created] = await Character.upsert(charData, { returning: true });
             return sendJson(res, character.toJSON(), created ? 201 : 200);
         }
+    }
+
+    // Персонажи пользователя (требуется авторизация)
+    if (pathname === '/api/characters/mine' && method === 'GET') {
+        authRequired(req, res, async function (user) {
+            try {
+                const rows = await Character.findAll({
+                    where: { userId: user.userId },
+                    order: [['updatedAt', 'DESC']]
+                });
+                return sendJson(res, rows.map(function (row) {
+                    var json = row.toJSON();
+                    return {
+                        id: json.id,
+                        name: json.name,
+                        tags: json.tags,
+                        updatedAt: json.updatedAt,
+                        createdAt: json.createdAt
+                    };
+                }));
+            } catch (e) {
+                console.error('Characters mine error:', e);
+                return sendError(res, 'Ошибка: ' + e.message);
+            }
+        });
+        return;
     }
 
     if (pathname.startsWith('/api/characters/')) {
@@ -419,6 +525,7 @@ async function startServer() {
     try {
         await sequelize.authenticate();
         await sequelize.sync();
+        await migrateAddUserId();
         await seedRacesIfEmpty();
         await seedClassesIfEmpty();
         await seedSpellsIfEmpty();
