@@ -187,3 +187,65 @@ function mergeMulticlassSlots(classes) {
     
     return Object.values(slotsMap).sort((a, b) => a.level - b.level);
 }
+
+// ========== API-ФУНКЦИИ (СЕРВЕРНЫЙ ИСТОЧНИК ИСТИНЫ) ==========
+// Асинхронные версии, использующие серверный API.
+// В Stage 8 станут основными, синхронные таблицы — фоллбэком.
+
+/**
+ * Получить прогрессию класса с сервера.
+ * @param {string} className
+ * @param {number} level
+ * @returns {Promise<Object>} — { spellSlots, cantripsKnown, resourceMax, resourceName, ... }
+ */
+async function fetchClassProgression(className, level) {
+    try {
+        var url = '/api/classes/progression/' + className + '?level=' + level;
+        var response = await fetch(url);
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return await response.json();
+    } catch (e) {
+        console.warn('fetchClassProgression: ошибка, использую локальные таблицы', e);
+        return null;
+    }
+}
+
+/**
+ * Получить ячейки заклинаний с сервера.
+ * @param {string} className
+ * @param {number} level
+ * @returns {Promise<Array>}
+ */
+async function fetchSpellSlots(className, level) {
+    try {
+        var url = '/api/classes/spell-slots?class=' + className + '&level=' + level;
+        var response = await fetch(url);
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        var data = await response.json();
+        return data.slots || [];
+    } catch (e) {
+        // Фоллбэк на локальные таблицы
+        return getSpellSlotsForClass(className, level);
+    }
+}
+
+/**
+ * Объединить ячейки мультикласса через сервер.
+ * @param {Array} classes — [{className, level}]
+ * @returns {Promise<Array>}
+ */
+async function fetchMulticlassSlots(classes) {
+    try {
+        var response = await fetch('/api/classes/multiclass-slots', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ classes: classes })
+        });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        var data = await response.json();
+        return data.slots || [];
+    } catch (e) {
+        // Фоллбэк на локальную функцию
+        return mergeMulticlassSlots(classes);
+    }
+}

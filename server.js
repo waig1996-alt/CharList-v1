@@ -10,6 +10,10 @@ const {
     buildClassSpellMap, getFullClassMap,
     getSpellClassesEn, getAllClasses
 } = require('./models/spell-utils');
+const {
+    getClassProgression, getSpellSlots,
+    mergeMulticlassSlots, isSpellcasterClass
+} = require('./models/class-progression');
 
 const PORT = process.env.PORT || 3000;
 const publicRoot = path.join(__dirname);
@@ -342,6 +346,42 @@ async function handleApi(req, res, pathname) {
                 jsonData: JSON.stringify(normalizeObjectData(body.jsonData || {}))
             });
             return sendJson(res, cls.toJSON(), 201);
+        }
+    }
+
+    // Прогрессия класса (spell slots, resources, cantrips)
+    if (pathname.startsWith('/api/classes/progression/')) {
+        if (method === 'GET') {
+            const className = pathname.split('/')[4];
+            if (!className) return sendError(res, 'Имя класса не указано', 400);
+            const query = Object.fromEntries(new URL(req.url, 'http://localhost').searchParams.entries());
+            const level = parseInt(query.level) || 1;
+            const progression = getClassProgression(className, level);
+            return sendJson(res, progression);
+        }
+    }
+
+    // Ячейки заклинаний для класса (быстрый доступ)
+    if (pathname === '/api/classes/spell-slots') {
+        if (method === 'GET') {
+            const query = Object.fromEntries(new URL(req.url, 'http://localhost').searchParams.entries());
+            const className = query.class;
+            const level = parseInt(query.level) || 1;
+            if (!className) return sendError(res, 'Параметр class обязателен', 400);
+            const slots = getSpellSlots(className, level);
+            return sendJson(res, { className, level, slots });
+        }
+    }
+
+    // Объединение ячеек для мультикласса
+    if (pathname === '/api/classes/multiclass-slots') {
+        if (method === 'POST') {
+            const body = await parseBody(req);
+            if (!body || !body.classes || !Array.isArray(body.classes)) {
+                return sendError(res, 'Тело запроса должно содержать массив classes [{className, level}]', 400);
+            }
+            const slots = mergeMulticlassSlots(body.classes);
+            return sendJson(res, { slots });
         }
     }
 
