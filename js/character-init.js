@@ -27,13 +27,11 @@ async function initNewCharacter() {
     let hitDice = getHitDiceByClass(selectedClass);
     state.multClasses = [{ className: selectedClass, level: 1, hitDice: hitDice }];
 
-    // Применить стандартные характеристики для класса (Standard Array 15-8)
-    var classStats = classDefaultStats[selectedClass] || classDefaultStats.fighter;
+    // Характеристики: по умолчанию 10, игрок редактирует сам
     allStats.forEach(function (attr) {
-        var value = classStats[attr] || 10;
-        state.stats[attr] = value;
+        state.stats[attr] = 10;
         var el = document.getElementById(attr);
-        if (el) el.value = value;
+        if (el) el.value = 10;
     });
 
     // Сброс всех классовых ресурсов к начальным значениям
