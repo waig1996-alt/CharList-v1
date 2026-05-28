@@ -27,26 +27,9 @@ async function initNewCharacter() {
     let hitDice = getHitDiceByClass(selectedClass);
     state.multClasses = [{ className: selectedClass, level: 1, hitDice: hitDice }];
 
-    // Сброс всех ресурсов
-    const defaultResources = {
-        barbarian: { current: 2, max: 2 },
-        bard: { current: 0, max: 0 },
-        cleric: { current: 1, max: 1 },
-        druid: { current: 0, max: 0 },
-        fighter: { current: 1, max: 1 },
-        monk: { current: 0, max: 0 },
-        paladin: { current: 0, max: 0 },
-        ranger: { current: 0, max: 0 },
-        rogue: { current: 0, max: 0 },
-        sorcerer: { current: 0, max: 0 },
-        warlock: { current: 0, max: 0 },
-        wizard: { current: 0, max: 0 }
-    };
-
-    if (defaultResources[selectedClass]) {
-        state.classResources[selectedClass].current = defaultResources[selectedClass].current;
-        state.classResources[selectedClass].max = defaultResources[selectedClass].max;
-    }
+    // Сброс всех классовых ресурсов к начальным значениям
+    // (значения берутся из ClassResourceRegistry — единственный источник истины)
+    resetAllClassResources();
 
     state.manualHpEnabled = true;
     document.getElementById('manualHpCheckbox').checked = true;
@@ -57,12 +40,11 @@ async function initNewCharacter() {
     state.currentHp = state.maxHp;
     state.hpHistory = [];
 
-    if (typeof renderMulticlass === 'function') renderMulticlass();
-    if (typeof renderSavingThrows === 'function') renderSavingThrows();
-    if (typeof renderClassResource === 'function') renderClassResource();
-    if (typeof updateUI === 'function') updateUI();
     if (typeof addToLog === 'function') addToLog('🎉 Создан персонаж класса ' + classNames[selectedClass]);
     if (typeof autoSave === 'function') autoSave();
+
+    // Рендер после инициализации (через координатор View)
+    CharacterSheetView.renderAfterInit();
 
     const maxHpInput = document.getElementById('maxHpInput');
     if (maxHpInput) maxHpInput.value = state.maxHp;

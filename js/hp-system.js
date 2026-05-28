@@ -1,39 +1,46 @@
 // ============ СИСТЕМА ХИТОВ, ОТДЫХ, СПАСБРОСКИ СМЕРТИ ============
-// Зависит от: state.js, ui-core.js, utils.js
+// Зависит от: state.js, ui-core.js, ability-scores.js, hit-points.js
+//
+// ПОСЛЕ РЕФАКТОРИНГА: бизнес-логика в HitPoints модели.
+// Здесь — только UI-обвязка: prompt(), addToLog(), autoSave(), updateUI().
 
 function healHp() {
-    let h = parseInt(prompt("Лечение: "));
+    var h = parseInt(prompt("Лечение: "));
     if (h > 0) {
-        state.currentHp = Math.min(state.maxHp, state.currentHp + h);
+        var result = HitPoints.heal(h);
+        HitPoints.syncDOM();
         updateUI();
-        addToLog('💚 +' + h + ' хп');
+        addToLog('💚 +' + result.healed + ' хп');
         autoSave();
     }
 }
 
 function dealDamage() {
-    let d = parseInt(prompt("Урон:"));
+    var d = parseInt(prompt("Урон:"));
     if (d > 0) {
-        let remainingDamage = d;
-        let tempAbsorbed = Math.min(state.tempHp, remainingDamage);
-        state.tempHp -= tempAbsorbed;
-        remainingDamage -= tempAbsorbed;
-        let realDamage = Math.min(state.currentHp, remainingDamage);
-        state.currentHp -= realDamage;
-        remainingDamage -= realDamage;
-        document.getElementById('tempHp').value = state.tempHp;
+        var result = HitPoints.damage(d);
+        HitPoints.syncDOM();
         updateUI();
-        addToLog('💔 Получено ' + d + ' урона: ' + tempAbsorbed + ' поглощено временными хитами, ' + realDamage + ' снято с основных. Осталось временных: ' + state.tempHp + ', основных: ' + state.currentHp + '/' + state.maxHp);
-        if (state.currentHp <= 0) addToLog('⚠️ Персонаж без сознания! Используйте спасброски от смерти.');
+
+        addToLog(
+            '💔 Получено ' + result.total + ' урона: ' +
+            result.tempAbsorbed + ' поглощено временными хитами, ' +
+            result.realDamage + ' снято с основных. ' +
+            'Осталось временных: ' + state.tempHp +
+            ', основных: ' + state.currentHp + '/' + state.maxHp
+        );
+
+        if (result.isUnconscious) {
+            addToLog('⚠️ Персонаж без сознания! Используйте спасброски от смерти.');
+        }
         autoSave();
     }
 }
 
 function setTempHp() {
-    let newTemp = parseInt(document.getElementById('tempHp').value);
+    var newTemp = parseInt(document.getElementById('tempHp').value);
     if (!isNaN(newTemp) && newTemp >= 0) {
-        state.tempHp = newTemp;
-        document.getElementById('tempHp').value = state.tempHp;
+        HitPoints.setTemp(newTemp);
         updateUI();
         addToLog('🛡️ Временные хиты установлены: ' + state.tempHp);
         autoSave();
@@ -43,68 +50,66 @@ function setTempHp() {
 }
 
 function clearTempHp() {
-    state.tempHp = 0;
-    document.getElementById('tempHp').value = 0;
+    HitPoints.clearTemp();
     updateUI();
     addToLog('✨ Временные хиты сброшены');
     autoSave();
 }
 
 function shortRest() {
+    HitPoints.shortRest();
     addToLog('🛌 Короткий отдых');
 }
 
 function longRest() {
-    let exhaustion = parseInt(document.getElementById('exhaustion')?.value) || 0;
-    if (exhaustion > 0) {
-        exhaustion--;
-        document.getElementById('exhaustion').value = exhaustion;
-        updateExhaustionEffects();
-        addToLog('🌿 Долгий отдых: уровень истощения снижен до ' + exhaustion + '.');
-    } else {
-        addToLog(' Долгий отдых: здоровье и слоты восстановлены.');
+    var result = HitPoints.longRest();
+    updateExhaustionEffects();
+
+    if (result.exhaustionReduced) {
+        addToLog('🌿 Долгий отдых: уровень истощения снижен.');
     }
-    state.currentHp = state.maxHp;
-    state.tempHp = 0;
-    state.spellSlots.forEach(s => s.current = s.max);
-    state.deathSuccess = 0;
-    state.deathFail = 0;
-    document.getElementById('tempHp').value = 0;
-    renderSlots();
+    addToLog('🏠 Долгий отдых: здоровье и слоты восстановлены.');
+
+    // Восстановление ячеек заклинаний
+    state.spellSlots.forEach(function (s) { s.current = s.max; });
+    if (typeof renderSlots === 'function') renderSlots();
+
+    HitPoints.syncDOM();
     updateUI();
     autoSave();
 }
 
 function rollDeathSave() {
-    let r = Math.floor(Math.random() * 20) + 1;
-    if (r >= 10) {
-        state.deathSuccess = Math.min(3, state.deathSuccess + 1);
-        addToLog('✅ Спасбросок смерти: ' + r + ' (' + state.deathSuccess + '/3)');
-        if (state.deathSuccess == 3) addToLog('✨ Стабилизирован');
+    var result = HitPoints.rollDeathSave();
+
+    if (result.isSuccess) {
+        addToLog('✅ Спасбросок смерти: ' + result.roll + ' (' + result.successCount + '/3)');
+        if (result.isStabilized) addToLog('✨ Стабилизирован');
     } else {
-        state.deathFail = Math.min(3, state.deathFail + 1);
-        addToLog('❌ Спасбросок смерти: ' + r + ' (' + state.deathFail + '/3)');
-        if (state.deathFail === 3) addToLog('💀 Гибель');
+        addToLog('❌ Спасбросок смерти: ' + result.roll + ' (' + result.failCount + '/3)');
+        if (result.isDead) addToLog('💀 Гибель');
     }
+
+    HitPoints.syncDOM();
     updateUI();
     autoSave();
 }
 
 function resetDeathSaves() {
-    state.deathSuccess = 0;
-    state.deathFail = 0;
+    HitPoints.resetDeathSaves();
+    HitPoints.syncDOM();
     updateUI();
     autoSave();
 }
 
 function rollInitiative() {
-    let dexMod = getMod('dex');
-    let bonus = parseInt(document.getElementById('initBonus')?.value) || 0;
-    let totalBonus = dexMod + bonus;
+    var dexMod = AbilityScores.modifier('dex');
+    var bonus = parseInt(document.getElementById('initBonus')?.value) || 0;
+    var totalBonus = dexMod + bonus;
     rollD20(totalBonus, "Инициатива", addToLog);
 }
 
 function setAc() {
-    let v = parseInt(document.getElementById('acInput')?.value);
+    var v = parseInt(document.getElementById('acInput')?.value);
     if (!isNaN(v)) document.getElementById('acValue').innerText = v;
 }

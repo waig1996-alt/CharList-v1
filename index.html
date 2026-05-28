@@ -405,6 +405,12 @@
 <!-- 2. Глобальное состояние (state, APP_VERSION) -->
 <script src="js/state.js"></script>
 
+<!-- 2.5. Модель характеристик (AbilityScores — 6 статов, modifier(), applyBoosts) -->
+<script src="js/ability-scores.js"></script>
+
+<!-- 2.6. Модель хитов (HitPoints — урон/лечение/отдых/спасброски смерти) -->
+<script src="js/hit-points.js"></script>
+
 <!-- 3. Константы (classNames, classOptionsList, навыки, спасброски) -->
 <script src="js/constants.js"></script>
 
@@ -433,14 +439,23 @@
 <!-- 9.5 Таблицы ячеек заклинаний (для всех типов кастеров) -->
 <script src="js/spell-slots-tables.js"></script>
 
+<!-- 9.6. Модель книги заклинаний (SpellBook — слоты, список, бонус атаки) -->
+<script src="js/spell-book.js"></script>
+
 <!-- 10. Заклинания (renderSpells, castSpell, renderSlots) -->
 <script src="js/spells.js"></script>
 
-<!-- 11. Классовые ресурсы (renderClassResource — 12 классов) -->
+<!-- 10.5. Реестр классовых ресурсов (calcMax, initValue для 12 классов) — чистые данные -->
+<script src="js/class-resource-registry.js"></script>
+
+<!-- 11. Классовые ресурсы (renderClassResource — использует реестр, без if/else) -->
 <script src="js/class-resources.js"></script>
 
 <!-- 12. Инвентарь, способности, заметки (renderInventory, renderFeatures, renderNotes) -->
 <script src="js/inventory.js"></script>
+
+<!-- 12.5. Модель персонажа (CharacterModel — единственная точка сериализации) -->
+<script src="js/character-model.js"></script>
 
 <!-- 13. Система хитов (heal, damage, rests, death saves) -->
 <script src="js/hp-system.js"></script>
@@ -456,6 +471,9 @@
 
 <!-- 16. Бросок кубиков (dice-roller — независимый модуль) -->
 <script src="js/dice-roller.js"></script>
+
+<!-- 16.5. Координатор рендеринга (CharacterSheetView — renderAll, softSync, bindEvents) -->
+<script src="js/character-sheet-view.js"></script>
 
 <!-- 17. Точка входа (DOMContentLoaded, запуск приложения) -->
 <script src="js/app.js"></script>

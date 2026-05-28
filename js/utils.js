@@ -1,11 +1,19 @@
 // Глобальные функции
+// ВАЖНО: getMod(), getProfBonus(), parseDamage() ПЕРЕОПРЕДЕЛЕНЫ в roll-engine.js.
+// Версии ниже — заглушки на случай изменения порядка скриптов.
+// Актуальная логика: roll-engine.js → AbilityScores.modifier() (из state, не из DOM).
+
 function getMod(statId) {
-    let v = parseInt(document.getElementById(statId).value) || 10;
+    // Fallback: если AbilityScores ещё не загружена, читаем из DOM
+    if (typeof AbilityScores !== 'undefined' && AbilityScores.modifier) {
+        return AbilityScores.modifier(statId);
+    }
+    var v = parseInt(document.getElementById(statId).value) || 10;
     return Math.floor((v - 10) / 2);
 }
 
 function getProfBonus() {
-    return parseInt(document.getElementById('profBonus').value) || 2;
+    return state.profBonus || 2;
 }
 
 function parseDamage(damageStr) {

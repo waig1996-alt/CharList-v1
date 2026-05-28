@@ -211,15 +211,22 @@ function closeRollModal() {
 }
 
 // ============ УТИЛИТЫ ============
-function getProfBonus() {
-    return state.profBonus || 2;
-}
+// ВАЖНО: getMod() и getProfBonus() определены в roll-engine.js,
+// они ПЕРЕОПРЕДЕЛЯЮТ версии из utils.js (загруженного раньше).
+// РЕФАКТОРИНГ: getMod() теперь читает из state.stats через AbilityScores,
+// а не из DOM (устраняет антипаттерн чтения из document.getElementById).
 
 function getMod(attr) {
-    let el = document.getElementById(attr);
-    if (!el) return 0;
-    let val = parseInt(el.value) || 10;
-    return Math.floor((val - 10) / 2);
+    // Используем AbilityScores если доступна, иначе fallback на DOM
+    if (typeof AbilityScores !== 'undefined' && AbilityScores.modifier) {
+        return AbilityScores.modifier(attr);
+    }
+    // Fallback (не должен вызываться после загрузки всех скриптов):
+    return Math.floor(((state.stats[attr] || 10) - 10) / 2);
+}
+
+function getProfBonus() {
+    return state.profBonus || 2;
 }
 
 function parseDamage(damageStr) {

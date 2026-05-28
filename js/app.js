@@ -1,19 +1,40 @@
 // ============ ТОЧКА ВХОДА - ЗАПУСК ПРИЛОЖЕНИЯ ============
 // Зависит от: ВСЕХ модулей (подключены в index.html перед этим файлом)
+//
+// ПОСЛЕ РЕФАКТОРИНГА: рендеринг делегирован в CharacterSheetView.
+// app.js занимается только: версией, темой, диалогом, маршрутизацией.
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Версия
     const versionSpan = document.getElementById('appVersion');
     if (versionSpan) versionSpan.textContent = APP_VERSION;
 
+    // Миграция
     checkAndMigrateVersion();
 
+    // Загрузка рас из БД
     if (typeof loadRaceOptionsFromDb === 'function') {
         await loadRaceOptionsFromDb();
     }
 
+    // Базовый рендер интерфейса (до загрузки данных)
+    CharacterSheetView.renderAll();
+
+    // Биндинг событий (один раз)
+    CharacterSheetView.bindEvents();
+
+    // Тема
+    const savedTheme = localStorage.getItem('dnd_theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) themeToggle.innerHTML = '☀️ Светлая тема';
+    }
+
+    // Проверка наличия сохранения
     const saved = localStorage.getItem(STORAGE_DATA_KEY);
-    let savedData = null;
-    let hasSavedData = false;
+    var savedData = null;
+    var hasSavedData = false;
 
     if (saved) {
         try {
@@ -24,61 +45,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch(e) {}
     }
 
-    let action = '1';
-    let needImport = false;
+    var action = '1';
+    var needImport = false;
 
     if (hasSavedData) {
         action = prompt(
             '🔄 Найдено сохранение персонажа "' + (savedData.charName || 'Безымянный') + '" (' + (classNames[savedData.primaryClass] || savedData.primaryClass) + ', уровень ' + (savedData.multClasses[0]?.level || 1) + ').' +
-            '\n' +
-            '\n' +
-            'Введите номер действия:' +
-            '\n' +
-            '1 - Загрузить сохранение' +
-            '\n' +
-            '2 - Создать нового персонажа' +
-            '\n' +
+            '\n\nВведите номер действия:\n' +
+            '1 - Загрузить сохранение\n' +
+            '2 - Создать нового персонажа\n' +
             '3 - Импортировать персонажа из JSON файла'
         );
         needImport = (action === '3');
     } else {
         action = prompt(
-            '🎭 Добро пожаловать в D&D 5e Character Sheet!' +
-            '\n' +
-            '\n' +
-            'Введите номер действия:' +
-            '\n' +
-            '1 - Создать нового персонажа' +
-            '\n' +
+            '🎭 Добро пожаловать в D&D 5e Character Sheet!\n\n' +
+            'Введите номер действия:\n' +
+            '1 - Создать нового персонажа\n' +
             '2 - Импортировать персонажа из JSON файла'
         );
         needImport = (action === '2');
     }
 
-    // Сначала рендерим базовый интерфейс
-    if (typeof updateSpeedDisplay === 'function') updateSpeedDisplay();
-    if (typeof updateExhaustionEffects === 'function') updateExhaustionEffects();
-    if (typeof updateMaxHp === 'function') updateMaxHp();
-    if (typeof renderSkills === 'function') renderSkills();
-    if (typeof renderInventory === 'function') renderInventory();
-    if (typeof renderSpells === 'function') renderSpells();
-    if (typeof renderSlots === 'function') renderSlots();
-    if (typeof renderAttacks === 'function') renderAttacks();
-    if (typeof renderFeatures === 'function') renderFeatures();
-    if (typeof renderNotes === 'function') renderNotes();
-    if (typeof initEventHandlers === 'function') initEventHandlers();
-
-    const savedTheme = localStorage.getItem('dnd_theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark');
-        const themeToggle = document.getElementById('themeToggle');
-        if (themeToggle) themeToggle.innerHTML = '☀️ Светлая тема';
-    }
-
     // Если выбран импорт — сразу открываем диалог выбора файла
     if (needImport) {
         if (typeof triggerFileImport === 'function') {
-            setTimeout(() => triggerFileImport(), 100);
+            setTimeout(function () { triggerFileImport(); }, 100);
         } else {
             addToLog('📀 Нажмите кнопку "📂 Загрузить" в блоке Журнал для импорта персонажа из JSON файла');
             alert('Для импорта персонажа нажмите кнопку "📂 Загрузить" в блоке "Журнал"');
