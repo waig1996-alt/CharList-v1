@@ -131,7 +131,16 @@
     flex: 1;
     min-width: 80px;
     font-size: 0.85rem;
-    padding: 6px 10px;
+    padding: 8px 12px;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Закреплённые заклинания */
@@ -194,20 +203,6 @@
     padding: 8px;
     background: #f5f5f5;
     border-radius: 6px;
-}
-
-/* Кнопки управления */
-button.dice {
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-button.dice:hover {
-    transform: scale(1.05);
-}
-
-button.dice:active {
-    transform: scale(0.95);
 }
 
 /* Тёмная тема поддержка */

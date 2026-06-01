@@ -100,8 +100,8 @@
     font-size: 1.5rem;
     cursor: pointer;
     padding: 0;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -124,17 +124,23 @@
     background: linear-gradient(135deg, #8b5cf6, #6d28d9);
     color: white;
     border: none;
-    padding: 12px 20px;
-    border-radius: 30px;
+    padding: 10px 18px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 1rem;
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
-    transition: all 0.3s;
+    font-size: 0.85rem;
+    font-weight: 500;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+    transition: all 0.2s;
 }
 
 .dice-roller-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
 }
 
 .dice-panel {
@@ -238,33 +244,7 @@
     justify-content: center;
 }
 
-.dice-action-btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.2s;
-}
-
-.btn-roll {
-    background: #8b5cf6;
-    color: white;
-}
-
-.btn-roll:hover {
-    background: #7c3aed;
-}
-
-.btn-close {
-    background: rgba(255, 255, 255, 0.1);
-    color: #94a3b8;
-}
-
-.btn-close:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #f8fafc;
-}
+/* Dice action buttons inherit from main style.css definitions */
 
 .result-item {
     background: rgba(139, 92, 246, 0.1);
@@ -343,12 +323,3 @@
     margin-right: 8px;
 }
 
-.small-btn {
-    padding: 4px 10px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    background: rgba(139, 92, 246, 0.3);
-    color: #e2e8f0;
-}

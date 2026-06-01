@@ -67,7 +67,7 @@
                     </div>
                 </div>
                 <button id="viewRaceDetailsBtn" class="small-btn">👁️ Подробно</button>
-                <button id="changeRaceBtn" class="small-btn" style="background: #8b3c2a;">🔄 Изменить</button>
+                <button id="changeRaceBtn" class="small-btn btn-danger">🔄 Изменить</button>
             </div>
             <div id="raceEmptyInfo" style="text-align: center; color: #7a582f; padding: 20px;">
                 <p>Выберите расу из списка выше →</p>
@@ -164,7 +164,7 @@
 
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <strong>📊 Ячейки заклинаний</strong>
-                        <button id="restoreSlotsBtn" class="dice" style="background: #2c6e2c;">🔄 Восстановить все</button>
+                        <button id="restoreSlotsBtn" class="dice btn-success">🔄 Восстановить все</button>
                     </div>
                     <div id="slotsList" style="margin-bottom:10px;"></div>
 
@@ -186,8 +186,8 @@
                         <input type="text" id="spellDamage" placeholder="Урон (1к6+3)" value="1к6" style="width:95px;">
                         <input type="text" id="spellDesc" placeholder="Описание" style="width:140px;">
                         <button id="addSpellBtn" class="dice">📖 добавить</button>
-                        <button id="addSpellFromDbBtn" class="dice" style="background:#2c6e2c;">📂 Из БД</button>
-                        <button id="addPinnedBtn" class="dice" style="background:#8b6914;">📌 закрепить</button>
+                        <button id="addSpellFromDbBtn" class="dice btn-success">📂 Из БД</button>
+                        <button id="addPinnedBtn" class="dice btn-warning">📌 закрепить</button>
                     </div>
                     <div class="formula-hint">При броске выбирай уровень ячейки — урон повысится на разницу в кубиках. Заговоры не тратят ячейки.</div>
                 </div>
@@ -225,7 +225,7 @@
             <option value="warlock">Колдун (Мудрость + Харизма)</option>
             <option value="wizard">Волшебник (Интеллект + Мудрость)</option>
         </select>
-        <button id="confirmClassBtn" style="width: 100%; padding: 10px;">🎲 Начать приключение</button>
+        <button id="confirmClassBtn" class="btn btn-medium" style="width: 100%;">🎲 Начать приключение</button>
     </div>
 </div>
 
@@ -382,7 +382,7 @@
     <div class="dice-panel-title" style="display: flex; justify-content: space-between; align-items: center;">
         <span>📜 История бросков</span>
         <div>
-            <button id="clearHistoryBtn" class="small-btn" style="background: #8b3c2a; margin-right: 5px;" onclick="clearHistory()">🗑</button>
+            <button id="clearHistoryBtn" class="small-btn btn-danger" style="margin-right: 5px;" onclick="clearHistory()">🗑</button>
             <button id="closeHistoryBtn" class="small-btn" onclick="closeRollHistory()">✕</button>
         </div>
     </div>

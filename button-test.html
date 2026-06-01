@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест унифицированных кнопок</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/races.css">
+    <link rel="stylesheet" href="css/spells.css">
+    <style>
+        body {
+            background: var(--bg-body);
+            color: var(--text-primary);
+            padding: 20px;
+        }
+        .test-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        h2 {
+            margin-top: 0;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+<div class="sheet-container" style="max-width: 1200px;">
+    <h1>🎯 Тест унифицированных стилей кнопок</h1>
+
+    <div class="test-section">
+        <h2>Основные кнопки (Primary) - Размер Medium</h2>
+        <div class="button-group">
+            <button class="dice">🎲 Primary Button</button>
+            <button class="dice">⬆ Повысить уровень</button>
+            <button class="dice">✨ Основное действие</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Вспомогательные кнопки (Secondary)</h2>
+        <div class="button-group">
+            <button class="collapse-all-btn">📁 Свернуть все</button>
+            <button class="theme-toggle">🌙 Тёмная тема</button>
+            <button class="btn-secondary">Secondary Button</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Кнопки опасных действий (Danger) - Размер Small</h2>
+        <div class="button-group">
+            <button class="small-btn btn-danger">🗑 Удалить</button>
+            <button class="remove-btn">❌ Удалить элемент</button>
+            <button class="remove-class-btn">🔄 Изменить</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Кнопки успеха (Success)</h2>
+        <div class="button-group">
+            <button class="btn-success">✅ Применить</button>
+            <button class="race-apply-btn">✅ Применить бонусы</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Кнопки предупреждения (Warning)</h2>
+        <div class="button-group">
+            <button class="level-up-btn">⬆ Повысить уровень</button>
+            <button class="btn-warning">⚠️ Warning Action</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Маленькие кнопки (Small Size)</h2>
+        <div class="button-group">
+            <button class="small-btn">➕ Добавить</button>
+            <button class="small-btn">👁️ Подробно</button>
+            <button class="small-btn btn-danger">🔄 Изменить</button>
+            <button class="small-btn btn-success">✅ Применить</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Крупные кнопки (Large Size)</h2>
+        <div class="button-group">
+            <button class="btn btn-large btn-primary">🎯 Большая кнопка</button>
+            <button class="btn btn-large btn-success">✅ Большой успех</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Кнопки действий (Action Buttons)</h2>
+        <div class="button-group">
+            <button class="dice-action-btn btn-roll">Бросить</button>
+            <button class="dice-action-btn btn-close">Закрыть</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Кнопки в модальных окнах</h2>
+        <div class="button-group">
+            <button class="race-apply-btn">✅ Применить бонусы</button>
+            <button class="race-close-btn">❌ Закрыть</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Проверка единообразной высоты</h2>
+        <p>Все кнопки ниже должны иметь одинаковую высоту в рамках одного размера:</p>
+        <div class="button-group" style="background: rgba(124, 58, 237, 0.1); padding: 10px; border-radius: 8px;">
+            <button class="small-btn">Small 1</button>
+            <button class="small-btn">Small 2</button>
+            <button class="small-btn">Small 3</button>
+        </div>
+        <div class="button-group" style="background: rgba(124, 58, 237, 0.1); padding: 10px; border-radius: 8px;">
+            <button class="dice">Medium 1</button>
+            <button class="dice">Medium 2</button>
+            <button class="dice">Medium 3</button>
+        </div>
+        <div class="button-group" style="background: rgba(124, 58, 237, 0.1); padding: 10px; border-radius: 8px;">
+            <button class="btn btn-large">Large 1</button>
+            <button class="btn btn-large">Large 2</button>
+            <button class="btn btn-large">Large 3</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
