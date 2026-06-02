@@ -38,9 +38,9 @@
         <div class="card-content">
             <div id="raceDisplayInfo" style="display: none;">
                 <div style="margin-bottom: 10px;">
-                    <strong>Выбранная раса:</strong> <span id="currentRaceDisplay" style="color: #2c6e2c; font-weight: bold;">-</span>
+                    <strong>Выбранная раса:</strong> <span id="currentRaceDisplay">-</span>
                 </div>
-                <div id="raceQuickInfo" style="background: #fff3e4; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.9rem;">
+                <div id="raceQuickInfo">
                     <div><strong>Бонусы:</strong> <span id="raceBoostsSummary">-</span></div>
                     <div><strong>Скорость:</strong> <span id="raceSpeedSummary">-</span></div>
                     <div><strong>Тёмное зрение:</strong> <span id="raceDarkvisionSummary">-</span></div>
@@ -55,7 +55,7 @@
                     <div class="race-trait-actions">
                         <label for="raceTraitSelect">Добавить черту</label>
                         <select id="raceTraitSelect"></select>
-                        <button id="addRaceTraitBtn" class="small-btn">➕ Добавить</button>
+                        <button id="addRaceTraitBtn" class="btn btn-small btn-success">➕ Добавить</button>
                     </div>
                     <div class="race-trait-table-wrap">
                         <table id="raceTraitsTable" class="race-traits-table">
@@ -66,10 +66,12 @@
                         </table>
                     </div>
                 </div>
-                <button id="viewRaceDetailsBtn" class="small-btn">👁️ Подробно</button>
-                <button id="changeRaceBtn" class="small-btn btn-danger">🔄 Изменить</button>
+                <div class="input-group" style="margin-top: 10px;">
+                    <button id="viewRaceDetailsBtn" class="btn btn-small btn-secondary">👁️ Подробно</button>
+                    <button id="changeRaceBtn" class="btn btn-small btn-danger">🔄 Изменить</button>
+                </div>
             </div>
-            <div id="raceEmptyInfo" style="text-align: center; color: #7a582f; padding: 20px;">
+            <div id="raceEmptyInfo">
                 <p>Выберите расу из списка выше →</p>
                 <p style="font-size: 0.9rem; opacity: 0.7;">Расовые бонусы помогут в развитии персонажа</p>
             </div>

@@ -369,20 +369,13 @@ function openRaceModal(raceName) {
     document.getElementById('raceDescription').textContent = raceData.description;
 
     // Бонусы к характеристикам
-    const isDarkMode = document.body.classList.contains('dark');
     const boostsHtml = Object.entries(raceData.abilityBoosts)
         .map(([ability, bonus]) => {
-            const abilityNames = { str: 'Сила', dex: 'Ловкость', con: 'Телосложение', 
+            const abilityNames = { str: 'Сила', dex: 'Ловкость', con: 'Телосложение',
                                    int: 'Интеллект', wis: 'Мудрость', cha: 'Харизма' };
             const sign = bonus > 0 ? '+' : '';
-            let color;
-            if (isDarkMode) {
-                color = bonus > 0 ? '#90ee90' : '#ff7a6a';
-            } else {
-                color = bonus > 0 ? '#0d4620' : '#6b1a10';
-            }
-            const labelColor = isDarkMode ? '#f0e0c0' : '#2c1a12';
-            return `<div class="race-boost-item"><div style="margin-bottom: 5px; color: ${labelColor};">${abilityNames[ability]}</div><strong style="color: ${color}; font-size: 1.3rem;">${sign}${bonus}</strong></div>`;
+            const valueClass = bonus > 0 ? '' : ' negative';
+            return `<div class="race-boost-item"><div class="race-boost-label">${abilityNames[ability]}</div><strong class="${valueClass}">${sign}${bonus}</strong></div>`;
         })
         .join('');
     document.getElementById('raceBoosts').innerHTML = boostsHtml;

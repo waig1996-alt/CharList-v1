@@ -495,11 +495,10 @@ async function showSpellSelectionModal() {
     // Строим UI модального окна
     var overlay = document.createElement('div');
     overlay.className = 'custom-prompt-overlay';
-    overlay.style.cssText = 'display:flex; align-items:center; justify-content:center; z-index:10000;';
 
     var modal = document.createElement('div');
     modal.className = 'custom-prompt';
-    modal.style.cssText = 'width:900px; max-width:calc(100vw - 40px); height:900px; display:flex; flex-direction:column; overflow:hidden;';
+    modal.style.cssText = 'width:900px; max-width:calc(100vw - 40px); height:90vh; display:flex; flex-direction:column; overflow:hidden;';
 
     // Загружаем список классов с сервера
     var classList = [];
@@ -509,30 +508,32 @@ async function showSpellSelectionModal() {
     } catch (e) { console.warn('Ошибка загрузки классов:', e); }
 
     var html = '';
-    html += '<div style="margin:10px 0; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">';
-    html += '<label style="font-weight:600; white-space:nowrap;">Язык:</label>';
-    html += '<select id="spellLanguageSelect" style="padding:8px; border:1px solid #ccc; border-radius:4px; min-width:140px;">';
+    // Строка поиска + язык
+    html += '<div class="spell-search-row">';
+    html += '<label>Язык:</label>';
+    html += '<select id="spellLanguageSelect">';
     html += '<option value="ru">Русский</option><option value="en">English</option>';
     html += '</select>';
-    html += '<input type="text" id="spellSearchBox" placeholder="🔍 Поиск..." style="flex:1 1 260px; min-width:220px; padding:8px; border:1px solid #ccc; border-radius:4px;">';
+    html += '<input type="text" id="spellSearchBox" placeholder="🔍 Поиск по названию..." style="flex:1 1 260px; min-width:180px;">';
     html += '</div>';
 
-    html += '<div style="margin:10px 0; display:flex; gap:8px; align-items:center; flex-wrap:nowrap; overflow-x:auto;">';
-    html += '<label style="font-weight:600; white-space:nowrap;">Фильтры:</label>';
-    html += '<select id="classFilter" style="padding:6px; border:1px solid #ccc; border-radius:4px; min-width:150px;">';
+    // Строка фильтров
+    html += '<div class="spell-filters-row">';
+    html += '<label>Фильтры:</label>';
+    html += '<select id="classFilter">';
     html += '<option value="">Все классы</option>';
     classList.forEach(function (cls) { html += '<option value="' + cls + '">' + cls + '</option>'; });
     html += '</select>';
-    html += '<select id="levelFilter" style="padding:6px; border:1px solid #ccc; border-radius:4px; min-width:150px;">';
+    html += '<select id="levelFilter">';
     html += '<option value="">Все уровни</option>';
     for (var i = 0; i <= 9; i++) {
         html += '<option value="' + i + '">' + (i === 0 ? 'Заговоры' : 'Уровень ' + i) + '</option>';
     }
     html += '</select>';
-    html += '<select id="schoolFilter" style="padding:6px; border:1px solid #ccc; border-radius:4px; min-width:150px;">';
+    html += '<select id="schoolFilter">';
     html += '<option value="">Все школы</option>';
     html += '</select>';
-    html += '<select id="actionFilter" style="padding:6px; border:1px solid #ccc; border-radius:4px; min-width:150px;">';
+    html += '<select id="actionFilter">';
     html += '<option value="">Все типы</option>';
     html += '<option value="action">Действие</option>';
     html += '<option value="bonus-action">Бонусное действие</option>';
@@ -541,9 +542,12 @@ async function showSpellSelectionModal() {
     html += '</select>';
     html += '</div>';
 
-    html += '<div id="spellsListContainer" style="flex:1; overflow-y:auto; border:1px solid #ddd; border-radius:4px; padding:10px; margin:10px 0; background:#fafafa;"></div>';
-    html += '<div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">';
-    html += '<button id="cancelDbSpellBtn" style="padding:8px 16px; background:#ccc; border:none; border-radius:4px; cursor:pointer;">❌ Отмена</button>';
+    // Список результатов
+    html += '<div id="spellsListContainer" class="spell-db-list"></div>';
+
+    // Нижняя панель
+    html += '<div class="spell-modal-footer">';
+    html += '<button id="cancelDbSpellBtn" class="btn-secondary">❌ Отмена</button>';
     html += '</div>';
 
     modal.innerHTML = html;
@@ -574,7 +578,8 @@ async function showSpellSelectionModal() {
             if (!response.ok) throw new Error('HTTP ' + response.status);
             currentResults = await response.json();
 
-            // Обновить выпадающий список школ на основе результатов
+            // Обновить выпадающий список школ, сохранив текущий выбор
+            var prevSchool = filters.school;
             var schools = [];
             currentResults.forEach(function (s) {
                 if (s.school && schools.indexOf(s.school) === -1) {
@@ -584,6 +589,16 @@ async function showSpellSelectionModal() {
             schools.sort();
             schoolFilterEl.innerHTML = '<option value="">Все школы</option>' +
                 schools.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
+            // Восстановить выбранное значение, если оно ещё есть в списке
+            if (prevSchool && schools.indexOf(prevSchool) !== -1) {
+                schoolFilterEl.value = prevSchool;
+            } else {
+                // Если выбранной школы нет в новых результатах — сброс фильтра
+                if (prevSchool && schools.indexOf(prevSchool) === -1) {
+                    filters.school = '';
+                }
+                schoolFilterEl.value = '';
+            }
         } catch (e) {
             console.error('Ошибка поиска заклинаний:', e);
             currentResults = [];
@@ -598,13 +613,17 @@ async function showSpellSelectionModal() {
         if (filters.action) {
             filtered = spells.filter(function (s) { return s.action === filters.action; });
         }
+        // Фильтр по школе применяется локально при action-фильтре
+        if (filters.school) {
+            filtered = filtered.filter(function (s) { return s.school === filters.school; });
+        }
 
         if (filtered.length === 0) {
-            listContainer.innerHTML = '<div style="color:#666; padding:16px; text-align:center;">Нет заклинаний по фильтру</div>';
+            listContainer.innerHTML = '<div class="spell-db-empty">Нет заклинаний по выбранным фильтрам</div>';
             return;
         }
 
-        var htmlList = filtered.map(function (spell, idx) {
+        var htmlList = filtered.map(function (spell) {
             var levelName = spell.level === 0 ? 'Заговор' : 'ЯЗ ' + spell.level;
             var actionIcon = spell.action === 'bonus-action' ? '⚡' :
                              spell.action === 'reaction' ? '🔄' :
@@ -613,22 +632,22 @@ async function showSpellSelectionModal() {
                 ? spell.description.substring(0, 100) + '...'
                 : (spell.description || '');
 
-            return '<div class="spell-db-item" data-spell-id="' + spell.id + '" style="padding:12px; border:1px solid #e0e0e0; margin:5px 0; border-radius:6px; cursor:pointer; background:white; transition:all 0.2s;" onmouseover="this.style.background=\'#f0f8ff\'; this.style.boxShadow=\'0 2px 8px rgba(0,0,0,0.1)\';" onmouseout="this.style.background=\'white\'; this.style.boxShadow=\'none\';">' +
-                '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">' +
-                '<strong style="flex:1; min-width:0;">' + spell.name + '</strong>' +
-                '<span style="background:#e8d4b8; padding:3px 8px; border-radius:12px; font-size:0.85rem; white-space:nowrap;">' + actionIcon + ' ' + levelName + '</span>' +
+            return '<div class="spell-db-item" data-spell-id="' + spell.id + '">' +
+                '<div class="spell-db-item-header">' +
+                '<strong>' + spell.name + '</strong>' +
+                '<span class="spell-db-level-badge">' + actionIcon + ' ' + levelName + '</span>' +
                 '</div>' +
-                '<div style="font-size:0.85rem; color:#666; margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">' +
+                '<div class="spell-db-item-meta">' +
                 '<span>🕐 ' + spell.castTime + '</span>' +
                 '<span>📊 ' + spell.attr.toUpperCase() + '</span>' +
                 (spell.damage ? '<span>💥 ' + spell.damage + '</span>' : '') +
                 (spell.school ? '<span>🏫 ' + spell.school + '</span>' : '') +
-                '<span style="background:#f0f0f0; padding:2px 6px; border-radius:10px; font-size:0.75rem;">' + selectedLanguage.toUpperCase() + '</span>' +
+                '<span class="spell-db-lang-badge">' + selectedLanguage.toUpperCase() + '</span>' +
                 '</div>' +
-                (spell.classes && spell.classes.length > 0 ? '<div style="font-size:0.8rem; color:#888; margin-top:4px;">👥 ' + spell.classes.join(', ') + '</div>' : '') +
-                '<div style="font-size:0.8rem; color:#999; margin-top:6px; max-height:40px; overflow:hidden;">' + shortDesc + '</div>' +
-                '<div style="margin-top:8px; text-align:right;">' +
-                '<button class="spell-details-btn" data-spell-id="' + spell.id + '" style="padding:4px 8px; background:#007bff; color:white; border:none; border-radius:4px; cursor:pointer; font-size:0.8rem;">Подробнее</button>' +
+                (spell.classes && spell.classes.length > 0 ? '<div class="spell-db-classes">👥 ' + spell.classes.join(', ') + '</div>' : '') +
+                (shortDesc ? '<div class="spell-db-desc-preview">' + shortDesc + '</div>' : '') +
+                '<div class="spell-db-item-footer">' +
+                '<button class="spell-details-btn" data-spell-id="' + spell.id + '">🔍 Подробнее</button>' +
                 '</div>' +
                 '</div>';
         }).join('');
@@ -645,7 +664,7 @@ async function showSpellSelectionModal() {
             });
         });
 
-        // Клик по карточке заклинания = выбрать
+        // Клик по карточке = выбрать заклинание
         listContainer.querySelectorAll('.spell-db-item').forEach(function (item) {
             item.addEventListener('click', function (e) {
                 if (e.target.classList.contains('spell-details-btn')) return;
@@ -662,6 +681,8 @@ async function showSpellSelectionModal() {
 
     langSelect.addEventListener('change', function (e) {
         selectedLanguage = e.target.value;
+        // Сбросить фильтр школы — школы могут различаться по языку
+        filters.school = '';
         searchSpells();
     });
 
@@ -677,12 +698,13 @@ async function showSpellSelectionModal() {
 
     schoolFilterEl.addEventListener('change', function (e) {
         filters.school = e.target.value;
-        searchSpells();
+        // Применяем школьный фильтр локально без перезапроса
+        renderResults(currentResults);
     });
 
     actionFilterEl.addEventListener('change', function (e) {
         filters.action = e.target.value;
-        renderResults(currentResults); // action фильтр — локально
+        renderResults(currentResults); // action-фильтр — локально
     });
 
     modal.querySelector('#cancelDbSpellBtn').addEventListener('click', function () {
@@ -705,42 +727,42 @@ async function showSpellSelectionModal() {
 function showSpellDetailsModalLocalized(spell) {
     var overlay = document.createElement('div');
     overlay.className = 'custom-prompt-overlay';
-    overlay.style.cssText = 'display:flex; align-items:center; justify-content:center; z-index:10001;';
 
     var modal = document.createElement('div');
     modal.className = 'custom-prompt';
-    modal.style.cssText = 'max-width:600px; max-height:80vh; overflow:auto;';
+    modal.style.cssText = 'max-width:620px; width:calc(100vw - 40px); max-height:80vh; overflow:auto;';
 
-    var html = '<h3 style="margin-top:0;">' + spell.name + '</h3>';
-    html += '<div style="margin:15px 0;">';
-    html += '<div style="background:#f8f9fa; padding:12px; border-radius:6px; margin-bottom:12px;">';
-    html += '<div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:8px;">';
-    html += '<span><strong>Уровень:</strong> ' + (spell.level === 0 ? 'Заговор' : spell.level) + '</span>';
+    var levelLabel = spell.level === 0 ? 'Заговор' : spell.level;
+    var html = '<h3 style="margin-top:0; color:var(--accent-light,#a78bfa);">' + spell.name + '</h3>';
+
+    html += '<div class="spell-details-info-block">';
+    html += '<div class="spell-details-props">';
+    html += '<span><strong>Уровень:</strong> ' + levelLabel + '</span>';
     html += '<span><strong>Школа:</strong> ' + (spell.school || 'Не указана') + '</span>';
-    html += '<span><strong>Время накладывания:</strong> ' + spell.castTime + '</span>';
+    html += '<span><strong>Время:</strong> ' + spell.castTime + '</span>';
     html += '<span><strong>Дальность:</strong> ' + (spell.range || 'Не указана') + '</span>';
-    html += '</div>';
-    html += '<div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:8px;">';
     html += '<span><strong>Компоненты:</strong> ' + (spell.components || 'Не указаны') + '</span>';
     html += '<span><strong>Длительность:</strong> ' + (spell.duration || 'Не указана') + '</span>';
     html += '<span><strong>Источник:</strong> ' + (spell.source || 'Не указан') + '</span>';
     html += '</div>';
-    html += '<div><strong>Классы:</strong> ' + (spell.classes && spell.classes.length > 0 ? spell.classes.join(', ') : 'Не указаны') + '</div>';
+    html += '<div class="spell-details-classes"><strong>Классы:</strong> ' +
+        (spell.classes && spell.classes.length > 0 ? spell.classes.join(', ') : 'Не указаны') + '</div>';
     html += '</div>';
-    html += '<div style="margin-bottom:12px;">';
-    html += '<strong>Описание:</strong>';
-    html += '<div style="margin-top:8px; padding:12px; background:#fff; border:1px solid #e0e0e0; border-radius:4px; white-space:pre-wrap;">' + (spell.description || '') + '</div>';
+
+    html += '<div class="spell-details-desc-block">';
+    html += '<strong>Описание</strong>';
+    html += '<div class="spell-details-desc-text">' + (spell.description || '') + '</div>';
     html += '</div>';
 
     if (spell.damage) {
-        html += '<div style="margin-bottom:12px;">';
-        html += '<strong>Урон:</strong>';
-        html += '<div style="margin-top:8px; padding:8px; background:#ffe6e6; border:1px solid #ffcccc; border-radius:4px;">' + spell.damage + '</div>';
+        html += '<div class="spell-details-damage-block">';
+        html += '<strong>Урон</strong>';
+        html += '<div class="spell-details-damage-value">💥 ' + spell.damage + '</div>';
         html += '</div>';
     }
 
-    html += '<div style="display:flex; gap:8px; justify-content:flex-end; margin-top:20px;">';
-    html += '<button id="closeDetailsBtn" style="padding:8px 16px; background:#6c757d; color:white; border:none; border-radius:4px; cursor:pointer;">Закрыть</button>';
+    html += '<div class="spell-modal-footer">';
+    html += '<button id="closeDetailsBtn" class="btn-secondary">✕ Закрыть</button>';
     html += '</div>';
 
     modal.innerHTML = html;

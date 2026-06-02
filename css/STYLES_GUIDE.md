@@ -1,4 +1,4 @@
-# 🎨 Руководство по стилям D&D 5e Character Sheet
+-# 🎨 Руководство по стилям D&D 5e Character Sheet
 
 ## Обзор
 
